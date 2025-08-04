@@ -142,7 +142,7 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     
     // Return cached results if they are less than 1 hour old
-    if (result && (Date.now() - result.createdAt.getTime()) < 3600000) {
+    if (result && result.createdAt && (Date.now() - result.createdAt.getTime()) < 3600000) {
       return result;
     }
     return undefined;

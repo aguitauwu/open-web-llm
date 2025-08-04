@@ -238,17 +238,17 @@ export function Sidebar({
           <div className="p-4 border-t border-gray-200 dark:border-gray-800">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={user.profileImageUrl || ""} alt={`${user.firstName} ${user.lastName}`} />
+                <AvatarImage src={user?.profileImageUrl || ""} alt={`${user?.firstName || ''} ${user?.lastName || ''}`} />
                 <AvatarFallback>
-                  {user.firstName?.[0]}{user.lastName?.[0]}
+                  {user?.firstName?.[0] || ''}{user?.lastName?.[0] || ''}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate">
-                  {user.firstName} {user.lastName}
+                  {user?.firstName || ''} {user?.lastName || ''}
                 </p>
                 <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                  {user.email}
+                  {user?.email || ''}
                 </p>
               </div>
               <Button

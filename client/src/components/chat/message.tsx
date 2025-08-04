@@ -146,7 +146,7 @@ export function Message({ message, onRegenerate }: MessageProps) {
           isUser ? "justify-end" : "justify-between"
         }`}>
           <div className={`flex items-center space-x-4 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
-            <span>{formatTime(new Date(message.createdAt))}</span>
+            <span>{formatTime(new Date(message.createdAt || Date.now()))}</span>
             {!isUser && metadata?.model && (
               <span className="flex items-center space-x-1">
                 <Bot className="h-3 w-3 text-purple-500" />
