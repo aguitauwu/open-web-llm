@@ -12,6 +12,9 @@ https://admin.mistral.ai/organization/api-keys
 Google search api y el ID 
 https://developers.google.com/custom-search/docs/paid_element?hl=es-419
 
+NEON database 
+https://console.neon.tech/app/org-holy-mode-64259581/welcome
+
 opcional (si lo configuras bien, que porque no me encargue yo? amigo este un proyecto rápido además te estoy ayudando en lo que puedo 🥺 ... pero si sabes podrías incluir hugginfaces en el proyecto 
 
 hugginfaces 
