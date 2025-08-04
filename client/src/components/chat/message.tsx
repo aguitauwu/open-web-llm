@@ -1,0 +1,195 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Copy, RotateCcw, Share, Bot, Search, Youtube } from "lucide-react";
+import type { Message } from "@shared/schema";
+
+interface MessageProps {
+  message: Message;
+  onRegenerate?: () => void;
+}
+
+export function Message({ message, onRegenerate }: MessageProps) {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(message.content);
+      setCopied(true);
+      toast({
+        title: "Copied to clipboard",
+        description: "Message content has been copied to clipboard.",
+      });
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast({
+        title: "Failed to copy",
+        description: "Could not copy message to clipboard.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "AI Chat Message",
+          text: message.content,
+        });
+      } catch (error) {
+        // User cancelled sharing
+      }
+    } else {
+      await handleCopy();
+    }
+  };
+
+  const formatTime = (date: Date) => {
+    return new Intl.DateTimeFormat("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(date);
+  };
+
+  const isUser = message.role === "user";
+  const metadata = message.metadata as any;
+
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "items-start space-x-3"}`}>
+      {!isUser && (
+        <Avatar className="h-8 w-8 flex-shrink-0">
+          <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+            <Bot className="h-4 w-4" />
+          </AvatarFallback>
+        </Avatar>
+      )}
+      
+      <div className={`flex-1 max-w-3xl ${isUser ? "" : "ml-0"}`}>
+        <div
+          className={`rounded-2xl px-4 py-3 ${
+            isUser
+              ? "bg-blue-600 text-white rounded-br-md"
+              : "bg-gray-100 dark:bg-gray-800 rounded-tl-md"
+          }`}
+        >
+          <div className="whitespace-pre-wrap">{message.content}</div>
+          
+          {/* Search Results */}
+          {!isUser && metadata?.searchResults && (
+            <div className="mt-4 space-y-3">
+              {metadata.searchResults.web && metadata.searchResults.web.length > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Search className="h-4 w-4 text-blue-500" />
+                    <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      Web Search Results
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {metadata.searchResults.web.slice(0, 3).map((result: any, index: number) => (
+                      <div key={index} className="text-sm">
+                        <a
+                          href={result.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+                        >
+                          {result.title}
+                        </a>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
+                          {result.snippet}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {metadata.searchResults.youtube && metadata.searchResults.youtube.length > 0 && (
+                <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-3">
+                  <div className="flex items-center space-x-2 mb-2">
+                    <Youtube className="h-4 w-4 text-red-500" />
+                    <span className="text-sm font-medium text-red-700 dark:text-red-300">
+                      YouTube Results
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    {metadata.searchResults.youtube.slice(0, 3).map((result: any, index: number) => (
+                      <div key={index} className="text-sm">
+                        <a
+                          href={result.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-red-600 dark:text-red-400 hover:underline font-medium"
+                        >
+                          {result.title}
+                        </a>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
+                          {result.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+        
+        <div className={`flex items-center mt-2 text-xs text-gray-600 dark:text-gray-400 ${
+          isUser ? "justify-end" : "justify-between"
+        }`}>
+          <div className={`flex items-center space-x-4 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
+            <span>{formatTime(new Date(message.createdAt))}</span>
+            {!isUser && metadata?.model && (
+              <span className="flex items-center space-x-1">
+                <Bot className="h-3 w-3 text-purple-500" />
+                <span>{metadata.model}</span>
+              </span>
+            )}
+          </div>
+          
+          {!isUser && (
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleCopy}
+                title="Copy message"
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
+              {onRegenerate && (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={onRegenerate}
+                  title="Regenerate"
+                >
+                  <RotateCcw className="h-3 w-3" />
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleShare}
+                title="Share"
+              >
+                <Share className="h-3 w-3" />
+              </Button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
