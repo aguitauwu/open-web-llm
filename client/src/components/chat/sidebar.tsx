@@ -24,16 +24,16 @@ interface SidebarProps {
 }
 
 const models = [
-  "Llama 3.1 70B (Reasoning)",
-  "Gemma 2 27B",
-  "Mistral 7B Instruct",
-  "DeepSeek Coder 33B",
-  "CodeLlama 34B",
-  "Mixtral 8x7B",
-  "Qwen2 72B",
-  "StarCoder 15B",
-  "Falcon 40B",
-  "Claude 3 Haiku",
+  "GPT-2",
+  "FLAN-T5 Large",
+  "FLAN-T5 XL",
+  "DistilGPT-2",
+  "BLOOM 560M",
+  "GPT-2 Medium",
+  "DialoGPT Medium",
+  "BlenderBot 400M",
+  "T5 Base",
+  "BART Large",
 ];
 
 export function Sidebar({

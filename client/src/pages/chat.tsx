@@ -13,7 +13,7 @@ function ChatContent() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedModel, setSelectedModel] = useState("Llama 3.1 70B (Reasoning)");
+  const [selectedModel, setSelectedModel] = useState("GPT-2");
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
