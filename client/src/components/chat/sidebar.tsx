@@ -24,11 +24,25 @@ interface SidebarProps {
 }
 
 const models = [
+  // Gemini Models
   "Gemini 2.5 Flash",
   "Gemini 2.5 Pro",
   "Gemini 1.5 Flash",
   "Gemini 1.5 Pro",
   "Gemini 1.0 Pro",
+  
+  // Mistral Models
+  "Mistral Large",
+  "Mistral 7B",
+  "Mixtral 8x7B",
+  "Mixtral 8x22B",
+  
+  // OpenRouter Models
+  "OpenRouter GPT-4o",
+  "OpenRouter Claude 3.5",
+  "OpenRouter Llama 3.1 70B",
+  "OpenRouter Qwen 2.5 72B",
+  "OpenRouter DeepSeek V3",
 ];
 
 export function Sidebar({
@@ -153,11 +167,31 @@ export function Sidebar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {models.map((model) => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
+              <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                Google Gemini
+              </div>
+              <SelectItem value="Gemini 2.5 Flash">Gemini 2.5 Flash</SelectItem>
+              <SelectItem value="Gemini 2.5 Pro">Gemini 2.5 Pro</SelectItem>
+              <SelectItem value="Gemini 1.5 Flash">Gemini 1.5 Flash</SelectItem>
+              <SelectItem value="Gemini 1.5 Pro">Gemini 1.5 Pro</SelectItem>
+              <SelectItem value="Gemini 1.0 Pro">Gemini 1.0 Pro</SelectItem>
+              
+              <div className="px-2 py-1 mt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                Mistral AI
+              </div>
+              <SelectItem value="Mistral Large">Mistral Large</SelectItem>
+              <SelectItem value="Mistral 7B">Mistral 7B</SelectItem>
+              <SelectItem value="Mixtral 8x7B">Mixtral 8x7B</SelectItem>
+              <SelectItem value="Mixtral 8x22B">Mixtral 8x22B</SelectItem>
+              
+              <div className="px-2 py-1 mt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+                OpenRouter
+              </div>
+              <SelectItem value="OpenRouter GPT-4o">GPT-4o</SelectItem>
+              <SelectItem value="OpenRouter Claude 3.5">Claude 3.5 Sonnet</SelectItem>
+              <SelectItem value="OpenRouter Llama 3.1 70B">Llama 3.1 70B</SelectItem>
+              <SelectItem value="OpenRouter Qwen 2.5 72B">Qwen 2.5 72B</SelectItem>
+              <SelectItem value="OpenRouter DeepSeek V3">DeepSeek V3</SelectItem>
             </SelectContent>
           </Select>
           <div className="mt-2 flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">

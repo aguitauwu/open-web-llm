@@ -4,20 +4,14 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
-import { generateChatResponse, getGeminiModelName } from "./gemini";
+import { queryAI } from "./gemini";
 
-// Gemini AI integration with fallback
-async function queryGeminiAI(model: string, prompt: string) {
-  const API_KEY = process.env.GEMINI_API_KEY;
-  if (!API_KEY) {
-    return generateFallbackResponse(prompt);
-  }
-
+// AI integration with fallback for all providers
+async function queryAIWithFallback(model: string, prompt: string) {
   try {
-    const geminiModel = getGeminiModelName(model);
-    return await generateChatResponse(prompt, geminiModel);
+    return await queryAI(model, prompt);
   } catch (error) {
-    console.error("Gemini API error:", error);
+    console.error("AI API error:", error);
     return generateFallbackResponse(prompt);
   }
 }
@@ -269,7 +263,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get AI response
-      const aiResponse = await queryGeminiAI(model || conversation.model, enhancedPrompt);
+      const aiResponse = await queryAIWithFallback(model || conversation.model, enhancedPrompt);
 
       // Save AI message
       const aiMessage = await storage.createMessage({

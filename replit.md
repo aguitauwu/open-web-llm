@@ -39,9 +39,11 @@ Preferred communication style: Simple, everyday language.
 - **Route Protection**: Server-side middleware and client-side guards
 
 ### External Service Integrations
-- **Hugging Face API**: For AI model inference with multiple model options
+- **Google Gemini API**: Primary AI service with 5 models (2.5 Flash, 2.5 Pro, 1.5 Flash, 1.5 Pro, 1.0 Pro)
+- **Mistral AI API**: Direct integration with 4 models (Large, 7B, Mixtral 8x7B, 8x22B)
+- **OpenRouter API**: Access to 5 premium models (GPT-4o, Claude 3.5, Llama 3.1 70B, Qwen 2.5 72B, DeepSeek V3)
 - **Google Custom Search API**: For web search capabilities with cached results
-- **Model Selection**: Support for various models including Llama, Gemma, Mistral, and others
+- **Model Selection**: Total of 15 different AI models across three providers
 
 ### State Management
 - **Server State**: TanStack Query for API data caching and synchronization
