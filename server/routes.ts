@@ -4,48 +4,20 @@ import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
+import { generateChatResponse, getGeminiModelName } from "./gemini";
 
-// Hugging Face API integration with fallback
-async function queryHuggingFace(model: string, prompt: string) {
-  const API_KEY = process.env.HUGGINGFACE_API_KEY || process.env.HF_API_KEY;
+// Gemini AI integration with fallback
+async function queryGeminiAI(model: string, prompt: string) {
+  const API_KEY = process.env.GEMINI_API_KEY;
   if (!API_KEY) {
     return generateFallbackResponse(prompt);
   }
 
   try {
-    const response = await fetch(`https://api-inference.huggingface.co/models/${model}`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 1000,
-          temperature: 0.7,
-          return_full_text: false,
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      console.warn(`Hugging Face API error: ${response.statusText}`);
-      return generateFallbackResponse(prompt);
-    }
-
-    const result = await response.json();
-    
-    // Handle different response formats
-    if (Array.isArray(result) && result[0]?.generated_text) {
-      return result[0].generated_text;
-    } else if (result?.generated_text) {
-      return result.generated_text;
-    } else {
-      return generateFallbackResponse(prompt);
-    }
+    const geminiModel = getGeminiModelName(model);
+    return await generateChatResponse(prompt, geminiModel);
   } catch (error) {
-    console.error("Hugging Face API error:", error);
+    console.error("Gemini API error:", error);
     return generateFallbackResponse(prompt);
   }
 }
@@ -297,8 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Get AI response
-      const modelName = getHuggingFaceModelName(model || conversation.model);
-      const aiResponse = await queryHuggingFace(modelName, enhancedPrompt);
+      const aiResponse = await queryGeminiAI(model || conversation.model, enhancedPrompt);
 
       // Save AI message
       const aiMessage = await storage.createMessage({
@@ -380,20 +351,4 @@ export async function registerRoutes(app: Express): Promise<Server> {
   return httpServer;
 }
 
-// Helper function to map display names to Hugging Face model names
-function getHuggingFaceModelName(displayName: string): string {
-  const modelMap: Record<string, string> = {
-    "GPT-2": "gpt2",
-    "FLAN-T5 Large": "google/flan-t5-large",
-    "FLAN-T5 XL": "google/flan-t5-xl",
-    "DistilGPT-2": "distilgpt2",
-    "BLOOM 560M": "bigscience/bloom-560m",
-    "GPT-2 Medium": "gpt2-medium",
-    "DialoGPT Medium": "microsoft/DialoGPT-medium",
-    "BlenderBot 400M": "facebook/blenderbot-400M-distill",
-    "T5 Base": "t5-base",
-    "BART Large": "facebook/bart-large",
-  };
-  
-  return modelMap[displayName] || "gpt2";
-}
+

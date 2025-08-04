@@ -24,16 +24,11 @@ interface SidebarProps {
 }
 
 const models = [
-  "GPT-2",
-  "FLAN-T5 Large",
-  "FLAN-T5 XL",
-  "DistilGPT-2",
-  "BLOOM 560M",
-  "GPT-2 Medium",
-  "DialoGPT Medium",
-  "BlenderBot 400M",
-  "T5 Base",
-  "BART Large",
+  "Gemini 2.5 Flash",
+  "Gemini 2.5 Pro",
+  "Gemini 1.5 Flash",
+  "Gemini 1.5 Pro",
+  "Gemini 1.0 Pro",
 ];
 
 export function Sidebar({

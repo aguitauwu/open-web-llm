@@ -13,7 +13,7 @@ function ChatContent() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedModel, setSelectedModel] = useState("GPT-2");
+  const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
