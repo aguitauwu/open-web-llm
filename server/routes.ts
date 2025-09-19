@@ -80,6 +80,9 @@ async function searchYouTube(query: string) {
   })) || [];
 }
 
+// Temporary storage for demo messages
+const demoMessages: Map<string, any[]> = new Map();
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupGoogleAuth(app);
@@ -233,8 +236,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/conversations/:id/messages', optionalAuth, async (req: any, res) => {
     try {
       if (req.user.isDemo) {
-        // Return demo messages
-        res.json([]);
+        // Return demo messages from temporary storage
+        const conversationId = req.params.id;
+        const messages = demoMessages.get(conversationId) || [];
+        res.json(messages);
       } else {
         const userId = req.user.claims?.sub || req.user.id;
         const conversationId = req.params.id;
@@ -257,7 +262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message content is required" });
       }
 
-      // For demo users, just return a demo response without DB operations
+      // For demo users, save messages to temporary storage
       if (req.user.isDemo) {
         const demoMessage = {
           id: `demo-msg-${Date.now()}`,
@@ -281,6 +286,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             originalPrompt: content,
           },
         };
+
+        // Save messages to temporary storage
+        const existingMessages = demoMessages.get(conversationId) || [];
+        existingMessages.push(demoMessage, demoAiMessage);
+        demoMessages.set(conversationId, existingMessages);
 
         return res.json({
           userMessage: demoMessage,
