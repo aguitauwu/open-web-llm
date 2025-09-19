@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Bot, ExternalLink } from "lucide-react";
 import { SiGoogle, SiGithub } from "react-icons/si";
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -11,6 +12,7 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isEmbedded, setIsEmbedded] = useState(false);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Detectar si estamos en un navegador embebido (iframe de Replit)
@@ -40,6 +42,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleGithubLogin = () => {
     // GitHub OAuth no está implementado aún
     alert("GitHub OAuth será implementado próximamente");
+  };
+
+  const handleDemoMode = async () => {
+    // Invalidate the user query to trigger a refetch, which will activate demo mode
+    await queryClient.invalidateQueries({ queryKey: ["/api/user"] });
+    onClose();
   };
 
   return (
@@ -93,7 +101,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
           </div>
           
           <Button
-            onClick={onClose}
+            onClick={handleDemoMode}
             variant="outline"
             className="w-full h-12 text-base"
             data-testid="button-demo-mode"

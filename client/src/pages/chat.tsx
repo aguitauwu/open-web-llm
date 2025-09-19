@@ -17,20 +17,15 @@ function ChatContent() {
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Redirect to login if not authenticated
+  // Redirect to home if not authenticated (no redirect needed, handled by Router)
   useEffect(() => {
     if (!isLoading && !user) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+      // This should not happen as Router already handles this case
+      // But if it does, redirect to home instead of a non-existent login page
+      window.location.href = "/";
       return;
     }
-  }, [user, isLoading, toast]);
+  }, [user, isLoading]);
 
   const createConversationMutation = useMutation({
     mutationFn: async () => {
@@ -56,7 +51,7 @@ function ChatContent() {
           variant: "destructive",
         });
         setTimeout(() => {
-          window.location.href = "/api/login";
+          window.location.href = "/";
         }, 500);
         return;
       }

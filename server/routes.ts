@@ -87,7 +87,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes (keep this one with authentication required)
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const user = await storage.getUser(userId);
       res.json(user);
     } catch (error) {
@@ -249,7 +249,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/conversations/:id/messages', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user.claims?.sub || req.user.id;
       const conversationId = req.params.id;
       const { content, model, includeWebSearch, includeYouTubeSearch } = req.body;
       
@@ -257,7 +257,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Message content is required" });
       }
 
-      // Verify conversation belongs to user
+      // For demo users, just return a demo response without DB operations
+      if (req.user.isDemo) {
+        const demoMessage = {
+          id: `demo-msg-${Date.now()}`,
+          conversationId,
+          role: "user",
+          content,
+          createdAt: new Date(),
+        };
+
+        // Get AI response
+        const aiResponse = await queryAIWithFallback(model || "gemini-pro", content);
+
+        const demoAiMessage = {
+          id: `demo-ai-msg-${Date.now()}`,
+          conversationId,
+          role: "assistant", 
+          content: aiResponse,
+          createdAt: new Date(),
+          metadata: {
+            model: model || "gemini-pro",
+            originalPrompt: content,
+          },
+        };
+
+        return res.json({
+          userMessage: demoMessage,
+          aiMessage: demoAiMessage,
+          searchResults: {},
+        });
+      }
+
+      // Verify conversation belongs to user (only for authenticated users)
       const conversation = await storage.getConversation(conversationId, userId);
       if (!conversation) {
         return res.status(404).json({ message: "Conversation not found" });

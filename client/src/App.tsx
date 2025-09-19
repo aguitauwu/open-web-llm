@@ -9,11 +9,11 @@ import Chat from "@/pages/chat";
 import NotFound from "@/pages/not-found";
 
 function Router() {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   return (
     <Switch>
-      {isLoading || !isAuthenticated ? (
+      {isLoading || !user ? (
         <Route path="/" component={Landing} />
       ) : (
         <>
