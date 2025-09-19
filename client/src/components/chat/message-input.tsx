@@ -43,7 +43,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
   }, [message]);
 
   return (
-    <div className="border-t border-gray-200 dark:border-gray-800 p-4">
+    <div className="border-t border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm p-4">
       <div className="max-w-4xl mx-auto">
         <form onSubmit={handleSubmit}>
           <div className="relative">
@@ -53,7 +53,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="Message Stelluna..."
-              className="min-h-[44px] max-h-32 resize-none pr-20 rounded-2xl"
+              className="min-h-[44px] max-h-32 resize-none pr-20 rounded-2xl border-gray-200/50 focus:border-blue-500/50 focus:ring-blue-500/20 shadow-sm"
               disabled={isLoading}
             />
             

@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { Copy, RotateCcw, Share, Bot, Search, Youtube } from "lucide-react";
+import stellunaImage from "../../assets/stelluna.jpg";
 import type { Message } from "@shared/schema";
 
 interface MessageProps {
@@ -63,19 +64,17 @@ export function Message({ message, onRegenerate }: MessageProps) {
   return (
     <div className={`flex ${isUser ? "justify-end" : "items-start space-x-3"}`}>
       {!isUser && (
-        <Avatar className="h-8 w-8 flex-shrink-0">
-          <AvatarFallback className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
-            <Bot className="h-4 w-4" />
-          </AvatarFallback>
-        </Avatar>
+        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+          <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
+        </div>
       )}
       
       <div className={`flex-1 max-w-3xl ${isUser ? "" : "ml-0"}`}>
         <div
-          className={`rounded-2xl px-4 py-3 ${
+          className={`rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow ${
             isUser
-              ? "bg-blue-600 text-white rounded-br-md"
-              : "bg-gray-100 dark:bg-gray-800 rounded-tl-md"
+              ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-md"
+              : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-tl-md"
           }`}
         >
           <div className="whitespace-pre-wrap">{message.content}</div>

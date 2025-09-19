@@ -122,12 +122,12 @@ export function Sidebar({
       
       {/* Sidebar */}
       <div
-        className={`fixed lg:relative inset-y-0 left-0 z-50 w-80 bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-transform duration-300 lg:translate-x-0 ${
+        className={`fixed lg:relative inset-y-0 left-0 z-50 w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200/50 dark:border-gray-800/50 flex flex-col transition-all duration-300 lg:translate-x-0 shadow-xl lg:shadow-none ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-semibold">Stelluna</h1>
             <div className="flex items-center space-x-2">
@@ -160,7 +160,7 @@ export function Sidebar({
         </div>
 
         {/* Model Selection */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
           <label className="block text-sm font-medium mb-2">AI Model</label>
           <Select value={selectedModel} onValueChange={onModelChange}>
             <SelectTrigger>
@@ -201,7 +201,7 @@ export function Sidebar({
         </div>
 
         {/* Search Features */}
-        <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
           <h3 className="text-sm font-medium mb-3">Search Features</h3>
           <div className="space-y-2">
             <div className="flex items-center space-x-3 text-sm p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
@@ -223,7 +223,7 @@ export function Sidebar({
 
         {/* Chat History */}
         <div className="flex-1 overflow-hidden">
-          <div className="p-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
             <h3 className="text-sm font-medium">Chat History</h3>
           </div>
           <ScrollArea className="flex-1 px-4">
@@ -264,7 +264,7 @@ export function Sidebar({
 
         {/* User Profile */}
         {user && (
-          <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-800/50">
             <div className="flex items-center space-x-3">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={user?.profileImageUrl || ""} alt={`${user?.firstName || ''} ${user?.lastName || ''}`} />

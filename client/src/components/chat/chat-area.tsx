@@ -168,7 +168,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
     return (
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between">
+        <div className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-800/50 p-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center space-x-3">
             <Button
               variant="ghost"
@@ -228,7 +228,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
   return (
     <div className="flex-1 flex flex-col">
       {/* Header */}
-      <div className="bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800 p-4 flex items-center justify-between">
+      <div className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-sm border-b border-gray-200/50 dark:border-gray-800/50 p-4 flex items-center justify-between shadow-sm">
         <div className="flex items-center space-x-3">
           <Button
             variant="ghost"
@@ -280,10 +280,10 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
                 <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
               </div>
               <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-md px-4 py-3">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse" style={{ animationDelay: "0.4s" }} />
+                <div className="flex items-center space-x-1">
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce" />
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }} />
+                  <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }} />
                 </div>
               </div>
             </div>
