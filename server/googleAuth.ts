@@ -47,62 +47,65 @@ export async function setupGoogleAuth(app: Express) {
   app.use(passport.initialize());
   app.use(passport.session());
 
-  // Configure Google OAuth strategy
-  passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID!,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    callbackURL: "https://opceanai.qzz.io/api/auth/google/callback"
-  }, async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {
-    try {
-      // Save user to database
-      await upsertUser(profile);
-      
-      // Return user profile
-      const user = {
-        id: profile.id,
-        email: profile.emails?.[0]?.value,
-        firstName: profile.name?.givenName,
-        lastName: profile.name?.familyName,
-        profileImageUrl: profile.photos?.[0]?.value,
-        accessToken,
-        refreshToken
-      };
-      
-      return done(null, user);
-    } catch (error) {
-      return done(error, null);
-    }
-  }));
+  // Only set up Google OAuth if credentials are available
+  if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    // Configure Google OAuth strategy
+    passport.use(new GoogleStrategy({
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: "https://opceanai.qzz.io/api/auth/google/callback"
+    }, async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {
+      try {
+        // Save user to database
+        await upsertUser(profile);
+        
+        // Return user profile
+        const user = {
+          id: profile.id,
+          email: profile.emails?.[0]?.value,
+          firstName: profile.name?.givenName,
+          lastName: profile.name?.familyName,
+          profileImageUrl: profile.photos?.[0]?.value,
+          accessToken,
+          refreshToken
+        };
+        
+        return done(null, user);
+      } catch (error) {
+        return done(error, null);
+      }
+    }));
 
-  // Serialize user
-  passport.serializeUser((user: any, done) => {
-    done(null, user.id);
-  });
+    // Serialize user
+    passport.serializeUser((user: any, done) => {
+      done(null, user.id);
+    });
 
-  // Deserialize user
-  passport.deserializeUser(async (id: string, done) => {
-    try {
-      const user = await storage.getUser(id);
-      done(null, user);
-    } catch (error) {
-      done(error, null);
-    }
-  });
+    // Deserialize user
+    passport.deserializeUser(async (id: string, done) => {
+      try {
+        const user = await storage.getUser(id);
+        done(null, user);
+      } catch (error) {
+        done(error, null);
+      }
+    });
 
-  // Google OAuth routes
-  app.get('/api/auth/google', 
-    passport.authenticate('google', { scope: ['profile', 'email'] })
-  );
+    // Google OAuth routes
+    app.get('/api/auth/google', 
+      passport.authenticate('google', { scope: ['profile', 'email'] })
+    );
 
-  app.get('/api/auth/google/callback', 
-    passport.authenticate('google', { failureRedirect: '/login' }),
-    (req, res) => {
-      // Success redirect
-      res.redirect('/');
-    }
-  );
+    app.get('/api/auth/google/callback', 
+      passport.authenticate('google', { failureRedirect: '/login' }),
+      (req, res) => {
+        // Success redirect
+        res.redirect('/');
+      }
+    );
+  }
 
-  // Get current user
+  // Get current user (always available)
   app.get('/api/auth/user', (req: any, res) => {
     if (req.isAuthenticated()) {
       res.json(req.user);
@@ -111,7 +114,7 @@ export async function setupGoogleAuth(app: Express) {
     }
   });
 
-  // Logout
+  // Logout (always available)
   app.get('/api/logout', (req: any, res) => {
     req.logout((err: any) => {
       if (err) {
