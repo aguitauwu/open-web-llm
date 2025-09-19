@@ -272,8 +272,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: new Date(),
         };
 
-        // Get AI response - ensure we use Gemini as default
-        const aiResponse = await queryAIWithFallback(model || "Gemini 2.5 Flash", content);
+        let enhancedPrompt = content;
+        let searchResults: any = {};
+
+        // Perform web search if requested (same logic as authenticated users)
+        if (includeWebSearch) {
+          try {
+            const webResults = await searchWeb(content);
+            searchResults.web = webResults;
+            
+            if (searchResults.web?.length > 0) {
+              enhancedPrompt += `\n\nWeb search results:\n${searchResults.web
+                .map((r: any) => `- ${r.title}: ${r.snippet}`)
+                .join('\n')}`;
+            }
+          } catch (error) {
+            console.error("Web search error:", error);
+          }
+        }
+
+        // Perform YouTube search if requested (same logic as authenticated users)
+        if (includeYouTubeSearch) {
+          try {
+            const youtubeResults = await searchYouTube(content);
+            searchResults.youtube = youtubeResults;
+            
+            if (searchResults.youtube?.length > 0) {
+              enhancedPrompt += `\n\nYouTube search results:\n${searchResults.youtube
+                .map((r: any) => `- ${r.title}: ${r.description}`)
+                .join('\n')}`;
+            }
+          } catch (error) {
+            console.error("YouTube search error:", error);
+          }
+        }
+
+        // Get AI response with enhanced prompt - ensure we use Gemini as default
+        const aiResponse = await queryAIWithFallback(model || "Gemini 2.5 Flash", enhancedPrompt);
 
         const demoAiMessage = {
           id: `demo-ai-msg-${Date.now()}`,
@@ -282,7 +317,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           content: aiResponse,
           createdAt: new Date(),
           metadata: {
-            model: model || "gemini-pro",
+            model: model || "Gemini 2.5 Flash",
+            searchResults,
             originalPrompt: content,
           },
         };
@@ -295,7 +331,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json({
           userMessage: demoMessage,
           aiMessage: demoAiMessage,
-          searchResults: {},
+          searchResults,
         });
       }
 
