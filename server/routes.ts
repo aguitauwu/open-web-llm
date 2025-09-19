@@ -85,9 +85,6 @@ async function searchImages(query: string) {
   const API_KEY = process.env.GOOGLE_API_KEY;
   const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
   
-  console.log("Debug - API_KEY exists:", !!API_KEY);
-  console.log("Debug - SEARCH_ENGINE_ID exists:", !!SEARCH_ENGINE_ID);
-  
   if (!API_KEY || !SEARCH_ENGINE_ID) {
     throw new Error("Google API credentials not found");
   }
