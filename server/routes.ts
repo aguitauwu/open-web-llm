@@ -80,6 +80,35 @@ async function searchYouTube(query: string) {
   })) || [];
 }
 
+// Google Custom Search API for Images
+async function searchImages(query: string) {
+  const API_KEY = process.env.GOOGLE_API_KEY;
+  const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
+  
+  if (!API_KEY || !SEARCH_ENGINE_ID) {
+    throw new Error("Google API credentials not found");
+  }
+
+  const response = await fetch(
+    `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&searchType=image&num=10&imgSize=medium`
+  );
+
+  if (!response.ok) {
+    throw new Error(`Google Image Search API error: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  return data.items?.map((item: any) => ({
+    title: item.title,
+    link: item.link,
+    thumbnail: item.image?.thumbnailLink || item.link,
+    contextLink: item.image?.contextLink,
+    displayLink: item.displayLink,
+    width: item.image?.width,
+    height: item.image?.height,
+  })) || [];
+}
+
 // Temporary storage for demo messages
 const demoMessages: Map<string, any[]> = new Map();
 
@@ -256,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const conversationId = req.params.id;
-      const { content, model, includeWebSearch, includeYouTubeSearch } = req.body;
+      const { content, model, includeWebSearch, includeYouTubeSearch, includeImageSearch } = req.body;
       
       if (!content) {
         return res.status(400).json({ message: "Message content is required" });
@@ -304,6 +333,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           } catch (error) {
             console.error("YouTube search error:", error);
+          }
+        }
+
+        // Perform Image search if requested (same logic as authenticated users)
+        if (includeImageSearch) {
+          try {
+            const imageResults = await searchImages(content);
+            searchResults.images = imageResults;
+            
+            if (searchResults.images?.length > 0) {
+              enhancedPrompt += `\n\nImage search results:\n${searchResults.images
+                .map((r: any) => `- ${r.title} from ${r.displayLink}`)
+                .join('\n')}`;
+            }
+          } catch (error) {
+            console.error("Image search error:", error);
           }
         }
 
@@ -400,6 +445,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (error) {
           console.error("YouTube search error:", error);
+        }
+      }
+
+      // Perform Image search if requested
+      if (includeImageSearch) {
+        try {
+          const cached = await storage.getCachedSearchResults(content, "images");
+          if (cached) {
+            searchResults.images = cached.results;
+          } else {
+            const imageResults = await searchImages(content);
+            searchResults.images = imageResults;
+            await storage.cacheSearchResults({
+              query: content,
+              type: "images",
+              results: imageResults,
+            });
+          }
+          
+          if (searchResults.images?.length > 0) {
+            enhancedPrompt += `\n\nImage search results:\n${searchResults.images
+              .map((r: any) => `- ${r.title} from ${r.displayLink}`)
+              .join('\n')}`;
+          }
+        } catch (error) {
+          console.error("Image search error:", error);
         }
       }
 
