@@ -47,10 +47,10 @@ function ImageGallery({ images }: ImageGalleryProps) {
         <div className="mb-3">
           <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
             <img
-              src={images[currentIndex].thumbnail}
+              src={images[currentIndex].link}
               alt={images[currentIndex].title}
               className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
-              onClick={() => window.open(images[currentIndex].link, '_blank')}
+              onClick={() => window.open(images[currentIndex].link, '_blank', 'noopener,noreferrer')}
             />
             
             {images.length > 1 && (
