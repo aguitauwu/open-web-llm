@@ -3,9 +3,129 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, RotateCcw, Share, Bot, Search, Youtube } from "lucide-react";
+import { Copy, RotateCcw, Share, Bot, Search, Youtube, Image, ChevronLeft, ChevronRight } from "lucide-react";
 import stellunaImage from "../../assets/stelluna.jpg";
 import type { Message } from "@shared/schema";
+
+interface ImageGalleryProps {
+  images: Array<{
+    title: string;
+    link: string;
+    thumbnail: string;
+    contextLink?: string;
+    displayLink: string;
+    width?: number;
+    height?: number;
+  }>;
+}
+
+function ImageGallery({ images }: ImageGalleryProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [showAll, setShowAll] = useState(false);
+
+  const displayedImages = showAll ? images : images.slice(0, 6);
+
+  const nextImage = () => {
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
+      <div className="flex items-center space-x-2 mb-3">
+        <Image className="h-4 w-4 text-green-500" />
+        <span className="text-sm font-medium text-green-700 dark:text-green-300">
+          Image Search Results ({images.length} found)
+        </span>
+      </div>
+      
+      {/* Featured/Current Image */}
+      {images.length > 0 && (
+        <div className="mb-3">
+          <div className="relative bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden">
+            <img
+              src={images[currentIndex].thumbnail}
+              alt={images[currentIndex].title}
+              className="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+              onClick={() => window.open(images[currentIndex].link, '_blank')}
+            />
+            
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                  data-testid="button-prev-image"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-1 transition-colors"
+                  data-testid="button-next-image"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+                
+                <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2 bg-black/50 text-white text-xs px-2 py-1 rounded">
+                  {currentIndex + 1} / {images.length}
+                </div>
+              </>
+            )}
+          </div>
+          
+          <div className="mt-2">
+            <a
+              href={images[currentIndex].link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-green-600 dark:text-green-400 hover:underline font-medium text-sm block truncate"
+              data-testid="link-current-image"
+            >
+              {images[currentIndex].title}
+            </a>
+            <p className="text-gray-600 dark:text-gray-400 text-xs mt-1">
+              Source: {images[currentIndex].displayLink}
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* Thumbnail Grid */}
+      <div className="grid grid-cols-6 gap-2">
+        {displayedImages.map((image, index) => (
+          <div
+            key={index}
+            className={`relative cursor-pointer rounded overflow-hidden ${
+              index === currentIndex ? 'ring-2 ring-green-500' : ''
+            }`}
+            onClick={() => setCurrentIndex(index)}
+            data-testid={`thumbnail-image-${index}`}
+          >
+            <img
+              src={image.thumbnail}
+              alt={image.title}
+              className="w-full h-16 object-cover hover:opacity-80 transition-opacity"
+            />
+          </div>
+        ))}
+      </div>
+      
+      {images.length > 6 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="mt-2 text-xs text-green-600 dark:text-green-400 hover:underline"
+          data-testid="button-toggle-show-all"
+        >
+          {showAll ? `Show less` : `Show all ${images.length} images`}
+        </button>
+      )}
+    </div>
+  );
+}
 
 interface MessageProps {
   message: Message;
@@ -136,6 +256,10 @@ export function Message({ message, onRegenerate }: MessageProps) {
                     ))}
                   </div>
                 </div>
+              )}
+              
+              {metadata.searchResults.images && metadata.searchResults.images.length > 0 && (
+                <ImageGallery images={metadata.searchResults.images} />
               )}
             </div>
           )}

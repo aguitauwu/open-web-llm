@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Paperclip, Send, Search, Youtube, Image } from "lucide-react";
 
 interface MessageInputProps {
-  onSendMessage: (message: string, options: { includeWebSearch: boolean; includeYouTubeSearch: boolean }) => void;
+  onSendMessage: (message: string, options: { includeWebSearch: boolean; includeYouTubeSearch: boolean; includeImageSearch: boolean }) => void;
   isLoading: boolean;
 }
 
@@ -14,15 +14,17 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const [includeWebSearch, setIncludeWebSearch] = useState(false);
   const [includeYouTubeSearch, setIncludeYouTubeSearch] = useState(false);
+  const [includeImageSearch, setIncludeImageSearch] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
-      onSendMessage(message.trim(), { includeWebSearch, includeYouTubeSearch });
+      onSendMessage(message.trim(), { includeWebSearch, includeYouTubeSearch, includeImageSearch });
       setMessage("");
       setIncludeWebSearch(false);
       setIncludeYouTubeSearch(false);
+      setIncludeImageSearch(false);
     }
   };
 
@@ -109,16 +111,18 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                 </Label>
               </div>
               
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="h-auto p-0 text-xs"
-                disabled={isLoading}
-              >
-                <Image className="h-3 w-3 mr-1" />
-                Image
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="image-search"
+                  checked={includeImageSearch}
+                  onCheckedChange={setIncludeImageSearch}
+                  disabled={isLoading}
+                />
+                <Label htmlFor="image-search" className="flex items-center space-x-1 cursor-pointer">
+                  <Image className="h-3 w-3" />
+                  <span>Images</span>
+                </Label>
+              </div>
             </div>
             
             <div className="flex items-center space-x-2">
