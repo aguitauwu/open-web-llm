@@ -14,6 +14,8 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
+import { MongoStorage } from "./mongoStorage";
+import { LocalStorage } from "./localStorage";
 
 // Interface for storage operations
 export interface IStorage {
@@ -157,4 +159,24 @@ export class DatabaseStorage implements IStorage {
   }
 }
 
-export const storage = new DatabaseStorage();
+// Storage factory - choose storage type based on environment
+function createStorage(): IStorage {
+  const storageType = process.env.STORAGE_TYPE || 'database';
+  
+  switch (storageType.toLowerCase()) {
+    case 'mongodb':
+      const mongoUrl = process.env.MONGODB_URL || 'mongodb://localhost:27017/ai-chat';
+      return new MongoStorage(mongoUrl);
+    
+    case 'local':
+    case 'memory':
+      return new LocalStorage();
+    
+    case 'database':
+    case 'postgres':
+    default:
+      return new DatabaseStorage();
+  }
+}
+
+export const storage = createStorage();

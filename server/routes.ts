@@ -159,47 +159,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/conversations/:id', isAuthenticated, async (req: any, res) => {
+  app.get('/api/conversations/:id', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const conversationId = req.params.id;
-      const conversation = await storage.getConversation(conversationId, userId);
-      
-      if (!conversation) {
-        return res.status(404).json({ message: "Conversation not found" });
+      if (req.user.isDemo) {
+        // Return demo conversation
+        const demoConversation = {
+          id: req.params.id,
+          title: "Demo Conversation",
+          userId: 'demo-user',
+          model: 'gemini-pro',
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        res.json(demoConversation);
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const conversationId = req.params.id;
+        const conversation = await storage.getConversation(conversationId, userId);
+        
+        if (!conversation) {
+          return res.status(404).json({ message: "Conversation not found" });
+        }
+        
+        res.json(conversation);
       }
-      
-      res.json(conversation);
     } catch (error) {
       console.error("Error fetching conversation:", error);
       res.status(500).json({ message: "Failed to fetch conversation" });
     }
   });
 
-  app.patch('/api/conversations/:id', isAuthenticated, async (req: any, res) => {
+  app.patch('/api/conversations/:id', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const conversationId = req.params.id;
-      const { title } = req.body;
-      
-      if (!title) {
-        return res.status(400).json({ message: "Title is required" });
+      if (req.user.isDemo) {
+        // Demo mode - just return success
+        res.json({ message: "Conversation updated successfully (demo mode)" });
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const conversationId = req.params.id;
+        const { title } = req.body;
+        
+        if (!title) {
+          return res.status(400).json({ message: "Title is required" });
+        }
+        
+        await storage.updateConversationTitle(conversationId, userId, title);
+        res.json({ message: "Conversation updated successfully" });
       }
-      
-      await storage.updateConversationTitle(conversationId, userId, title);
-      res.json({ message: "Conversation updated successfully" });
     } catch (error) {
       console.error("Error updating conversation:", error);
       res.status(500).json({ message: "Failed to update conversation" });
     }
   });
 
-  app.delete('/api/conversations/:id', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/conversations/:id', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const conversationId = req.params.id;
-      await storage.deleteConversation(conversationId, userId);
-      res.json({ message: "Conversation deleted successfully" });
+      if (req.user.isDemo) {
+        // Demo mode - just return success
+        res.json({ message: "Conversation deleted successfully (demo mode)" });
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const conversationId = req.params.id;
+        await storage.deleteConversation(conversationId, userId);
+        res.json({ message: "Conversation deleted successfully" });
+      }
     } catch (error) {
       console.error("Error deleting conversation:", error);
       res.status(500).json({ message: "Failed to delete conversation" });
@@ -207,19 +230,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Message routes
-  app.get('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+  app.get('/api/conversations/:id/messages', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const conversationId = req.params.id;
-      const messages = await storage.getConversationMessages(conversationId, userId);
-      res.json(messages);
+      if (req.user.isDemo) {
+        // Return demo messages
+        res.json([]);
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const conversationId = req.params.id;
+        const messages = await storage.getConversationMessages(conversationId, userId);
+        res.json(messages);
+      }
     } catch (error) {
       console.error("Error fetching messages:", error);
       res.status(500).json({ message: "Failed to fetch messages" });
     }
   });
 
-  app.post('/api/conversations/:id/messages', isAuthenticated, async (req: any, res) => {
+  app.post('/api/conversations/:id/messages', optionalAuth, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const conversationId = req.params.id;
