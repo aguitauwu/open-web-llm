@@ -128,3 +128,22 @@ export const isAuthenticated: RequestHandler = (req: any, res, next) => {
   }
   res.status(401).json({ message: "Unauthorized" });
 };
+
+// Middleware de autenticación opcional para modo demo
+export const optionalAuth: RequestHandler = (req: any, res, next) => {
+  // Si está autenticado, usar el usuario real
+  if (req.isAuthenticated()) {
+    return next();
+  }
+  
+  // Si no está autenticado, crear usuario demo temporal
+  req.user = {
+    id: 'demo-user',
+    email: 'demo@example.com',
+    firstName: 'Demo',
+    lastName: 'User',
+    isDemo: true
+  };
+  
+  return next();
+};

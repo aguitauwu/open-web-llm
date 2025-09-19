@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupGoogleAuth, isAuthenticated } from "./googleAuth";
+import { setupGoogleAuth, isAuthenticated, optionalAuth } from "./googleAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
 import { queryAI } from "./gemini";
@@ -84,7 +84,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupGoogleAuth(app);
 
-  // Auth routes
+  // Auth routes (keep this one with authentication required)
   app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
@@ -96,24 +96,59 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Conversation routes
-  app.get('/api/conversations', isAuthenticated, async (req: any, res) => {
+  // Demo mode - get current user (authenticated or demo)
+  app.get('/api/user', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
-      const conversations = await storage.getUserConversations(userId);
-      res.json(conversations);
+      if (req.user.isDemo) {
+        res.json(req.user);
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const user = await storage.getUser(userId);
+        res.json(user);
+      }
     } catch (error) {
-      console.error("Error fetching conversations:", error);
-      res.status(500).json({ message: "Failed to fetch conversations" });
+      console.error("Error fetching user:", error);
+      res.json(req.user); // Return demo user if DB fails
     }
   });
 
-  app.post('/api/conversations', isAuthenticated, async (req: any, res) => {
+  // Conversation routes (now with optional auth)
+  app.get('/api/conversations', optionalAuth, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      if (req.user.isDemo) {
+        // Return demo conversations for non-authenticated users
+        res.json([]);
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const conversations = await storage.getUserConversations(userId);
+        res.json(conversations);
+      }
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.json([]); // Return empty array for demo mode
+    }
+  });
+
+  app.post('/api/conversations', optionalAuth, async (req: any, res) => {
+    try {
       const validatedData = insertConversationSchema.parse(req.body);
-      const conversation = await storage.createConversation(userId, validatedData);
-      res.json(conversation);
+      
+      if (req.user.isDemo) {
+        // Create temporary conversation for demo mode
+        const demoConversation = {
+          id: `demo-${Date.now()}`,
+          title: validatedData.title,
+          userId: 'demo-user',
+          model: validatedData.model,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        };
+        res.json(demoConversation);
+      } else {
+        const userId = req.user.claims?.sub || req.user.id;
+        const conversation = await storage.createConversation(userId, validatedData);
+        res.json(conversation);
+      }
     } catch (error) {
       console.error("Error creating conversation:", error);
       if (error instanceof z.ZodError) {

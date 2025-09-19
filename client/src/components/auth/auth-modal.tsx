@@ -83,14 +83,23 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
             {isEmbedded ? "Continuar con Google (nueva pestaña)" : "Continue with Google"}
           </Button>
           
+          <div className="relative my-4">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">O</span>
+            </div>
+          </div>
+          
           <Button
-            onClick={handleGithubLogin}
+            onClick={onClose}
             variant="outline"
-            className="w-full h-12 text-base bg-gray-900 dark:bg-gray-800 text-white border-gray-900 dark:border-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700"
-            data-testid="button-github-login"
+            className="w-full h-12 text-base"
+            data-testid="button-demo-mode"
           >
-            <SiGithub className="h-5 w-5 mr-3" />
-            Continue with GitHub
+            <Bot className="h-5 w-5 mr-3" />
+            Probar sin iniciar sesión
           </Button>
         </div>
         
