@@ -118,17 +118,23 @@ export async function generateChatResponseWithContext(messages: Array<{role: str
 // Unified AI query function that routes to the appropriate API
 export async function queryAI(model: string, prompt: string): Promise<string> {
     try {
+        console.log("queryAI called with model:", model); // Debug log
+        
         if (model.startsWith("Gemini")) {
             const geminiModel = getGeminiModelName(model);
+            console.log("Using Gemini model:", geminiModel);
             return await generateChatResponse(prompt, geminiModel);
         } else if (model.startsWith("Mistral")) {
             const mistralModel = getMistralModelName(model);
+            console.log("Using Mistral model:", mistralModel);
             return await queryMistralAPI(mistralModel, prompt);
         } else if (model.startsWith("OpenRouter")) {
             const openRouterModel = getOpenRouterModelName(model);
+            console.log("Using OpenRouter model:", openRouterModel);
             return await queryOpenRouterAPI(openRouterModel, prompt);
         } else {
-            // Default to Gemini
+            // Default to Gemini for any unrecognized model
+            console.log("Using default Gemini model for:", model);
             return await generateChatResponse(prompt, "gemini-2.5-flash");
         }
     } catch (error) {

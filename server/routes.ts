@@ -272,8 +272,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           createdAt: new Date(),
         };
 
-        // Get AI response
-        const aiResponse = await queryAIWithFallback(model || "gemini-pro", content);
+        // Get AI response - ensure we use Gemini as default
+        const aiResponse = await queryAIWithFallback(model || "Gemini 2.5 Flash", content);
 
         const demoAiMessage = {
           id: `demo-ai-msg-${Date.now()}`,
@@ -367,8 +367,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Get AI response
-      const aiResponse = await queryAIWithFallback(model || conversation.model, enhancedPrompt);
+      // Get AI response - ensure we use Gemini as default
+      const aiResponse = await queryAIWithFallback(model || conversation.model || "Gemini 2.5 Flash", enhancedPrompt);
 
       // Save AI message
       const aiMessage = await storage.createMessage({
