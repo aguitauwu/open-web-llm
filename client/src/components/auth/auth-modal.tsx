@@ -10,11 +10,12 @@ interface AuthModalProps {
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const handleGoogleLogin = () => {
-    window.location.href = "/api/login";
+    window.location.href = "/api/auth/google";
   };
 
   const handleGithubLogin = () => {
-    window.location.href = "/api/login";
+    // GitHub OAuth no está implementado aún
+    alert("GitHub OAuth será implementado próximamente");
   };
 
   return (
