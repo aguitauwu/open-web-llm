@@ -1,8 +1,8 @@
-# AI Chat Assistant
+# Stelluna - AI Chat Assistant
 
 ## Overview
 
-This is a full-stack AI chat application built with React, Express, and PostgreSQL. The application provides a conversational interface where users can interact with various AI models, enhanced with web search capabilities. Users can authenticate via Replit Auth, create multiple conversations, and get AI responses with optional web search integration through Hugging Face models and Google Custom Search API.
+This is Stelluna, a full-stack AI chat application built with React, Express, and PostgreSQL. Stelluna is an intelligent AI companion that provides a conversational interface where users can interact with various AI models, enhanced with web search capabilities. Users can authenticate via Replit Auth, create multiple conversations, and get AI responses with optional web search integration through Hugging Face models and Google Custom Search API.
 
 ## User Preferences
 

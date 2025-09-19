@@ -52,7 +52,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Message AI Assistant..."
+              placeholder="Message Stelluna..."
               className="min-h-[44px] max-h-32 resize-none pr-20 rounded-2xl"
               disabled={isLoading}
             />

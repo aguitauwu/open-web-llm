@@ -8,6 +8,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { Message } from "./message";
 import { MessageInput } from "./message-input";
 import { Menu, Trash2, Download, Bot, Lightbulb, Code, Search as SearchIcon } from "lucide-react";
+import stellunaImage from "../../assets/stelluna.jpg";
 import type { Message as MessageType, Conversation } from "@shared/schema";
 
 interface ChatAreaProps {
@@ -187,12 +188,12 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
         {/* Welcome Content */}
         <div className="flex-1 flex items-center justify-center p-4">
           <div className="max-w-2xl mx-auto text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Bot className="h-8 w-8 text-white" />
+            <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4">
+              <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Welcome to AI Chat Assistant</h3>
+            <h3 className="text-xl font-semibold mb-2">Welcome to Stelluna</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Choose from 10 powerful AI models and enhance your conversations with web search and YouTube integration.
+              Your intelligent AI companion ready to help with various tasks. Enhance conversations with web search and YouTube integration.
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -275,8 +276,8 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
           {/* Typing indicator */}
           {isTyping && (
             <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bot className="h-4 w-4 text-white" />
+              <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
               </div>
               <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl rounded-tl-md px-4 py-3">
                 <div className="flex space-x-1">

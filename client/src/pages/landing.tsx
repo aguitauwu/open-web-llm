@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { ThemeProvider, useTheme } from "@/components/ui/theme-provider";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { Bot, Moon, Sun, Sparkles, Code, Search, MessageSquare, Zap, Shield } from "lucide-react";
+import stellunaImage from "../assets/stelluna.jpg";
 
 function LandingContent() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -18,7 +19,7 @@ function LandingContent() {
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <Bot className="h-6 w-6 text-white" />
               </div>
-              <h1 className="text-xl font-bold">AI Chat Assistant</h1>
+              <h1 className="text-xl font-bold">Stelluna</h1>
             </div>
             
             <div className="flex items-center space-x-4">
@@ -44,16 +45,16 @@ function LandingContent() {
       {/* Hero Section */}
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-8">
-            <Bot className="h-10 w-10 text-white" />
+          <div className="w-20 h-20 rounded-2xl overflow-hidden mx-auto mb-8">
+            <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
           </div>
           
           <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Chat with 10 Powerful AI Models
+            Chat with Stelluna
           </h2>
           
           <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
-            Experience the future of AI conversation with advanced models, real-time web search, 
+            Your intelligent AI companion powered by advanced models, real-time web search, 
             and YouTube integration. All in one beautiful interface.
           </p>
           
@@ -160,7 +161,7 @@ function LandingContent() {
       {/* Footer */}
       <footer className="border-t border-gray-200 dark:border-gray-800 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto text-center text-gray-600 dark:text-gray-400">
-          <p>&copy; 2024 AI Chat Assistant. All rights reserved.</p>
+          <p>&copy; 2024 Stelluna. All rights reserved.</p>
         </div>
       </footer>
 

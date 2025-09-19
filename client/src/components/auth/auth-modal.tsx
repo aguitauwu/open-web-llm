@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Bot, ExternalLink } from "lucide-react";
+import stellunaImage from "../../assets/stelluna.jpg";
 import { SiGoogle, SiGithub } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,12 +55,12 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Bot className="h-8 w-8 text-white" />
+          <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4">
+            <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
           </div>
-          <DialogTitle className="text-2xl font-semibold">Welcome to AI Chat</DialogTitle>
+          <DialogTitle className="text-2xl font-semibold">Welcome to Stelluna</DialogTitle>
           <DialogDescription>
-            Sign in to start chatting with AI models
+            Sign in to start chatting with your AI companion
           </DialogDescription>
         </DialogHeader>
         
