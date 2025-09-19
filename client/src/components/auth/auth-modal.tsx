@@ -1,7 +1,8 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Bot } from "lucide-react";
+import { Bot, ExternalLink } from "lucide-react";
 import { SiGoogle, SiGithub } from "react-icons/si";
+import { useState, useEffect } from "react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -9,8 +10,31 @@ interface AuthModalProps {
 }
 
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
+  const [isEmbedded, setIsEmbedded] = useState(false);
+
+  useEffect(() => {
+    // Detectar si estamos en un navegador embebido (iframe de Replit)
+    const checkEmbedded = () => {
+      try {
+        return window.self !== window.top;
+      } catch {
+        return true;
+      }
+    };
+    setIsEmbedded(checkEmbedded());
+  }, []);
+
   const handleGoogleLogin = () => {
-    window.location.href = "/api/auth/google";
+    if (isEmbedded) {
+      // Si estamos en iframe, abrir en nueva pestaña
+      window.open("/api/auth/google", "_blank");
+    } else {
+      window.location.href = "/api/auth/google";
+    }
+  };
+
+  const handleOpenInBrowser = () => {
+    window.open(window.location.href, "_blank");
   };
 
   const handleGithubLogin = () => {
@@ -32,19 +56,38 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
         </DialogHeader>
         
         <div className="space-y-3 mt-6">
+          {isEmbedded && (
+            <div className="p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-md mb-4">
+              <p className="text-sm text-amber-800 dark:text-amber-200 mb-2">
+                Para usar Google OAuth, es necesario abrir la aplicación en una nueva pestaña.
+              </p>
+              <Button
+                onClick={handleOpenInBrowser}
+                variant="outline"
+                size="sm"
+                className="w-full"
+              >
+                <ExternalLink className="h-4 w-4 mr-2" />
+                Abrir en navegador
+              </Button>
+            </div>
+          )}
+          
           <Button
             onClick={handleGoogleLogin}
             variant="outline"
             className="w-full h-12 text-base"
+            data-testid="button-google-login"
           >
             <SiGoogle className="h-5 w-5 mr-3 text-red-500" />
-            Continue with Google
+            {isEmbedded ? "Continuar con Google (nueva pestaña)" : "Continue with Google"}
           </Button>
           
           <Button
             onClick={handleGithubLogin}
             variant="outline"
             className="w-full h-12 text-base bg-gray-900 dark:bg-gray-800 text-white border-gray-900 dark:border-gray-800 hover:bg-gray-800 dark:hover:bg-gray-700"
+            data-testid="button-github-login"
           >
             <SiGithub className="h-5 w-5 mr-3" />
             Continue with GitHub
