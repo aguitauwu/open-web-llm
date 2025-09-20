@@ -1,9 +1,13 @@
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": null,
+  "functions": {
+    "api/[...path].ts": {
+      "includeFiles": "dist/public/**"
+    }
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
@@ -11,7 +15,7 @@
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": "/api/$1"
     }
   ],
   "env": {

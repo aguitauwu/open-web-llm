@@ -10,8 +10,8 @@ export function useAuth() {
   return {
     user,
     isLoading,
-    isAuthenticated: !!user && !user.isDemo,
-    isDemo: !!user?.isDemo,
+    isAuthenticated: !!user && !(user as any)?.isDemo,
+    isDemo: !!(user as any)?.isDemo,
     refetch,
   };
 }

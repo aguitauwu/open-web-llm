@@ -47,13 +47,11 @@ export async function createApp() {
     throw err;
   });
 
-  // Only serve static files in development
-  if (process.env.NODE_ENV !== "production") {
-    if (app.get("env") === "development") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
+  // Serve static files
+  if (app.get("env") === "development") {
+    await setupVite(app, server);
+  } else {
+    serveStatic(app);
   }
 
   return { app, server };
