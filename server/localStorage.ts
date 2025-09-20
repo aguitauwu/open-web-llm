@@ -15,6 +15,12 @@ export class LocalStorage implements IStorage {
   private conversations: Map<string, Conversation> = new Map();
   private messages: Map<string, Message> = new Map();
   private searchResults: Map<string, SearchResult> = new Map();
+  private autoSaveInterval: NodeJS.Timeout | null = null;
+
+  constructor() {
+    this.loadFromLocalStorage();
+    this.startAutoSave();
+  }
 
   // User operations
   async getUser(id: string): Promise<User | undefined> {
@@ -22,7 +28,7 @@ export class LocalStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const userId = userData.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const userId = userData.id || `user_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const existingUser = this.users.get(userId);
     const user = {
       ...userData,
@@ -49,7 +55,7 @@ export class LocalStorage implements IStorage {
   }
 
   async createConversation(userId: string, conversation: InsertConversation): Promise<Conversation> {
-    const id = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `conv_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const newConversation = {
       id,
       ...conversation,
@@ -114,12 +120,11 @@ export class LocalStorage implements IStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
-    const id = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const newMessage = {
       id,
       ...message,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date()
     } as Message;
     
     this.messages.set(id, newMessage);
@@ -141,7 +146,7 @@ export class LocalStorage implements IStorage {
   }
 
   async cacheSearchResults(searchResult: InsertSearchResult): Promise<SearchResult> {
-    const id = `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const id = `search_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
     const key = `${searchResult.query}_${searchResult.type}`;
     const newSearchResult = {
       id,
@@ -189,5 +194,29 @@ export class LocalStorage implements IStorage {
         console.warn('Failed to load from localStorage:', error);
       }
     }
+  }
+
+  // Auto-save functionality
+  private startAutoSave() {
+    if (this.autoSaveInterval) {
+      clearInterval(this.autoSaveInterval);
+    }
+    // Auto-save every 30 seconds
+    this.autoSaveInterval = setInterval(() => {
+      this.saveToLocalStorage();
+    }, 30000);
+  }
+
+  private stopAutoSave() {
+    if (this.autoSaveInterval) {
+      clearInterval(this.autoSaveInterval);
+      this.autoSaveInterval = null;
+    }
+  }
+
+  // Cleanup method
+  destroy() {
+    this.stopAutoSave();
+    this.saveToLocalStorage(); // Final save
   }
 }

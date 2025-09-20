@@ -65,8 +65,13 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6"
-                title="Attach file"
-                disabled={isLoading}
+                title="Attach file (coming soon)"
+                disabled={true}
+                data-testid="button-attach-file"
+                onClick={() => {
+                  // TODO: Implement file attachment functionality
+                  console.log("File attachment feature coming soon");
+                }}
               >
                 <Paperclip className="h-4 w-4" />
               </Button>
@@ -76,6 +81,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                 className="h-6 w-6"
                 disabled={!message.trim() || isLoading}
                 title="Send message"
+                data-testid="button-send-message"
               >
                 <Send className="h-4 w-4" />
               </Button>

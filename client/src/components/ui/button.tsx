@@ -37,6 +37,7 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean
+  "data-testid"?: string
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -46,6 +47,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        data-testid={props["data-testid"] || 'button'}
         {...props}
       />
     )

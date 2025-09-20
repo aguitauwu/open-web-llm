@@ -6,6 +6,9 @@ import { GoogleGenAI } from "@google/genai";
 //   - do not change this unless explicitly requested by the user
 
 // This API key is from Gemini Developer API Key, not vertex AI API Key
+if (!process.env.GEMINI_API_KEY) {
+  console.warn("Gemini API key not provided. Gemini models will not work.");
+}
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
 // Mistral API integration
@@ -55,7 +58,7 @@ async function queryOpenRouterAPI(model: string, prompt: string): Promise<string
             headers: {
                 "Authorization": `Bearer ${API_KEY}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": process.env.REPLIT_DOMAINS || "https://localhost:5000",
+                "HTTP-Referer": process.env.REPLIT_URL || "https://localhost:5000",
                 "X-Title": "AI Chat Assistant",
             },
             body: JSON.stringify({
@@ -85,7 +88,10 @@ export async function generateChatResponse(prompt: string, model: string = "gemi
             contents: prompt,
         });
 
-        return response.text || "I apologize, but I couldn't generate a response at the moment.";
+        if (!response || !response.text) {
+            throw new Error("Invalid response from Gemini API");
+        }
+        return response.text;
     } catch (error) {
         console.error("Gemini API error:", error);
         throw error;
@@ -108,7 +114,10 @@ export async function generateChatResponseWithContext(messages: Array<{role: str
             contents: contents,
         });
 
-        return response.text || "I apologize, but I couldn't generate a response at the moment.";
+        if (!response || !response.text) {
+            throw new Error("Invalid response from Gemini API");
+        }
+        return response.text;
     } catch (error) {
         console.error("Gemini API error:", error);
         throw error;
@@ -118,23 +127,34 @@ export async function generateChatResponseWithContext(messages: Array<{role: str
 // Unified AI query function that routes to the appropriate API
 export async function queryAI(model: string, prompt: string): Promise<string> {
     try {
-        console.log("queryAI called with model:", model); // Debug log
+        // Only log in development mode
+        if (process.env.NODE_ENV === 'development') {
+            console.log("queryAI called with model:", model);
+        }
         
         if (model.startsWith("Gemini")) {
             const geminiModel = getGeminiModelName(model);
-            console.log("Using Gemini model:", geminiModel);
+            if (process.env.NODE_ENV === 'development') {
+                console.log("Using Gemini model:", geminiModel);
+            }
             return await generateChatResponse(prompt, geminiModel);
         } else if (model.startsWith("Mistral")) {
             const mistralModel = getMistralModelName(model);
-            console.log("Using Mistral model:", mistralModel);
+            if (process.env.NODE_ENV === 'development') {
+                console.log("Using Mistral model:", mistralModel);
+            }
             return await queryMistralAPI(mistralModel, prompt);
         } else if (model.startsWith("OpenRouter")) {
             const openRouterModel = getOpenRouterModelName(model);
-            console.log("Using OpenRouter model:", openRouterModel);
+            if (process.env.NODE_ENV === 'development') {
+                console.log("Using OpenRouter model:", openRouterModel);
+            }
             return await queryOpenRouterAPI(openRouterModel, prompt);
         } else {
             // Default to Gemini for any unrecognized model
-            console.log("Using default Gemini model for:", model);
+            if (process.env.NODE_ENV === 'development') {
+                console.log("Using default Gemini model for:", model);
+            }
             return await generateChatResponse(prompt, "gemini-2.5-flash");
         }
     } catch (error) {

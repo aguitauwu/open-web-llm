@@ -70,7 +70,7 @@ export class MongoStorage implements IStorage {
 
   async createConversation(userId: string, conversation: InsertConversation): Promise<Conversation> {
     const newConversation = {
-      id: `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `conv_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       ...conversation,
       userId,
       createdAt: new Date(),
@@ -115,7 +115,7 @@ export class MongoStorage implements IStorage {
 
   async createMessage(message: InsertMessage): Promise<Message> {
     const newMessage = {
-      id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       conversationId: message.conversationId,
       role: message.role,
       content: message.content,
@@ -142,7 +142,7 @@ export class MongoStorage implements IStorage {
 
   async cacheSearchResults(searchResult: InsertSearchResult): Promise<SearchResult> {
     const newSearchResult = {
-      id: `search_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `search_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       ...searchResult,
       createdAt: new Date()
     };

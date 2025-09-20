@@ -63,7 +63,18 @@ function LandingContent() {
               Start Chatting
               <Sparkles className="ml-2 h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 py-3">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="text-lg px-8 py-3"
+              data-testid="button-learn-more"
+              onClick={() => {
+                // Scroll to features section
+                document.querySelector('[data-testid="features-section"]')?.scrollIntoView({ 
+                  behavior: 'smooth' 
+                });
+              }}
+            >
               Learn More
             </Button>
           </div>
@@ -71,7 +82,10 @@ function LandingContent() {
       </section>
 
       {/* Features Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-gray-800/50">
+      <section 
+        className="py-20 px-4 sm:px-6 lg:px-8 bg-white/50 dark:bg-gray-800/50"
+        data-testid="features-section"
+      >
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h3 className="text-3xl font-bold mb-4">Powerful Features</h3>

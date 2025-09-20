@@ -144,7 +144,7 @@ export class DatabaseStorage implements IStorage {
       .limit(1);
     
     // Return cached results if they are less than 1 hour old
-    if (result && result.createdAt && (Date.now() - result.createdAt.getTime()) < 3600000) {
+    if (result && result.createdAt && (Date.now() - result.createdAt.getTime()) < CACHE_TTL_MS) {
       return result;
     }
     return undefined;
@@ -158,6 +158,9 @@ export class DatabaseStorage implements IStorage {
     return newResult;
   }
 }
+
+// Constants
+const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour in milliseconds
 
 // Storage factory - choose storage type based on environment
 function createStorage(): IStorage {
