@@ -116,10 +116,11 @@ export class MongoStorage implements IStorage {
   async createMessage(message: InsertMessage): Promise<Message> {
     const newMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-      ...message,
+      conversationId: message.conversationId,
+      role: message.role,
+      content: message.content,
       metadata: message.metadata || null,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      createdAt: new Date()
     };
     
     await this.messages.insertOne(newMessage);

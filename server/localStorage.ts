@@ -22,15 +22,16 @@ export class LocalStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const existingUser = this.users.get(userData.id!);
+    const userId = userData.id || `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const existingUser = this.users.get(userId);
     const user = {
       ...userData,
-      id: userData.id!,
+      id: userId,
       createdAt: existingUser?.createdAt || new Date(),
       updatedAt: new Date()
     } as User;
     
-    this.users.set(userData.id!, user);
+    this.users.set(userId, user);
     return user;
   }
 
