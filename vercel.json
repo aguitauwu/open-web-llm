@@ -1,11 +1,9 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev", 
-  "installCommand": "npm install",
-  "framework": null,
+  "outputDirectory": "dist/public",
   "functions": {
     "api/[...path].ts": {
-      "includeFiles": "dist/public/**"
+      "includeFiles": "dist/index.js"
     }
   },
   "rewrites": [
@@ -14,7 +12,6 @@
       "destination": "/api/$1"
     }
   ],
-  "public": "dist/public",
   "env": {
     "NODE_ENV": "production"
   }
