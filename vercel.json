@@ -1,6 +1,6 @@
 {
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "devCommand": "npm run dev", 
   "installCommand": "npm install",
   "framework": null,
   "functions": {
@@ -12,12 +12,9 @@
     {
       "source": "/api/(.*)",
       "destination": "/api/$1"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/api/$1"
     }
   ],
+  "public": "dist/public",
   "env": {
     "NODE_ENV": "production"
   }
