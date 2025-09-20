@@ -1,1 +1,3 @@
-echo '{"outputDirectory": "dist/public"}' > vercel.json
+{
+  "outputDirectory": "dist/public"
+}
