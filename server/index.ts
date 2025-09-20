@@ -26,8 +26,8 @@ export async function createApp() {
           logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
         }
 
-        if (logLine.length > 80) {
-          logLine = logLine.slice(0, 79) + "…";
+        if (logLine.length > 200) {
+          logLine = logLine.slice(0, 199) + "…";
         }
 
         log(logLine);
@@ -39,12 +39,18 @@ export async function createApp() {
 
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
 
-    res.status(status).json({ message });
-    throw err;
+    // Only send response if not already sent
+    if (!res.headersSent) {
+      res.status(status).json({ message });
+    }
+    
+    // Log the error for debugging but don't throw
+    console.error('Server error:', err);
+    next();
   });
 
   // Serve static files

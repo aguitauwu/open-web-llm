@@ -5,6 +5,7 @@ import stellunaImage from "../../assets/stelluna.jpg";
 import { SiGoogle, SiGithub } from "react-icons/si";
 import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ interface AuthModalProps {
 export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [isEmbedded, setIsEmbedded] = useState(false);
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   useEffect(() => {
     // Detectar si estamos en un navegador embebido (iframe de Replit)
@@ -41,8 +43,11 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
   };
 
   const handleGithubLogin = () => {
-    // GitHub OAuth no está implementado aún
-    alert("GitHub OAuth será implementado próximamente");
+    toast({
+      title: "Próximamente",
+      description: "GitHub OAuth será implementado próximamente",
+      variant: "default",
+    });
   };
 
   const handleDemoMode = async () => {
