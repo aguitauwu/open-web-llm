@@ -22,14 +22,15 @@ export class LocalStorage implements IStorage {
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
-    const existingUser = this.users.get(userData.id);
+    const existingUser = this.users.get(userData.id!);
     const user = {
       ...userData,
+      id: userData.id!,
       createdAt: existingUser?.createdAt || new Date(),
       updatedAt: new Date()
     } as User;
     
-    this.users.set(userData.id, user);
+    this.users.set(userData.id!, user);
     return user;
   }
 
@@ -37,7 +38,11 @@ export class LocalStorage implements IStorage {
   async getUserConversations(userId: string): Promise<Conversation[]> {
     const userConversations = Array.from(this.conversations.values())
       .filter(conv => conv.userId === userId)
-      .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime());
+      .sort((a, b) => {
+        const aTime = a.updatedAt?.getTime() || 0;
+        const bTime = b.updatedAt?.getTime() || 0;
+        return bTime - aTime;
+      });
     
     return userConversations;
   }
@@ -98,7 +103,11 @@ export class LocalStorage implements IStorage {
 
     const conversationMessages = Array.from(this.messages.values())
       .filter(message => message.conversationId === conversationId)
-      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+      .sort((a, b) => {
+        const aTime = a.createdAt?.getTime() || 0;
+        const bTime = b.createdAt?.getTime() || 0;
+        return aTime - bTime;
+      });
     
     return conversationMessages;
   }

@@ -117,6 +117,7 @@ export class MongoStorage implements IStorage {
     const newMessage = {
       id: `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       ...message,
+      metadata: message.metadata || null,
       createdAt: new Date(),
       updatedAt: new Date()
     };
