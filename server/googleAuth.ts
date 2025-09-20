@@ -53,7 +53,7 @@ export async function setupGoogleAuth(app: Express) {
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: "https://opceanai.qzz.io/api/auth/google/callback"
+      callbackURL: process.env.GOOGLE_CALLBACK_URL || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5000'}/api/auth/google/callback`
     }, async (accessToken: string, refreshToken: string, profile: any, done: VerifyCallback) => {
       try {
         // Save user to database
