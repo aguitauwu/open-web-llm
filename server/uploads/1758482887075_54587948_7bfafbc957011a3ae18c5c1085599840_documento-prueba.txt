@@ -1,0 +1,27 @@
+Manual de Usuario - Sistema de Chat con IA
+==========================================
+
+Introducción:
+Este sistema permite a los usuarios chatear con una inteligencia artificial avanzada que puede analizar archivos de texto e imágenes.
+
+Características principales:
+- Chat conversacional con IA
+- Análisis automático de archivos subidos
+- Soporte para múltiples modelos de IA (Gemini, Mistral, OpenRouter)
+- Búsqueda web integrada
+- Búsqueda de videos en YouTube
+- Búsqueda de imágenes
+
+Instrucciones de uso:
+1. Inicia una nueva conversación
+2. Escribe tu mensaje o sube un archivo
+3. La IA analizará el archivo y responderá basándose en su contenido
+4. Puedes hacer preguntas específicas sobre el archivo subido
+
+Tipos de archivos soportados:
+- Documentos de texto (.txt, .md)
+- Imágenes (.jpg, .png, .gif, .webp)
+- Archivos JSON
+- Documentos de Office (limitado)
+
+Nota: Este es un documento de prueba para verificar que la IA puede leer y analizar correctamente el contenido de archivos de texto.

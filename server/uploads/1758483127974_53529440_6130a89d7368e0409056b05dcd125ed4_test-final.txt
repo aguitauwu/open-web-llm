@@ -1,0 +1,25 @@
+Manual de Usuario - Sistema de Chat IA
+===================================
+
+Este es un documento de prueba para verificar que el sistema de análisis de archivos con inteligencia artificial funciona correctamente.
+
+Funcionalidades principales:
+1. Carga automática de archivos
+2. Análisis inteligente del contenido
+3. Generación de resúmenes
+4. Extracción de información clave
+
+Tecnologías implementadas:
+- Google Gemini para análisis de texto
+- Drizzle ORM para gestión de base de datos
+- Express.js para API backend
+- React para interfaz de usuario
+
+Objetivo de esta prueba:
+Confirmar que la IA puede:
+- Leer este archivo correctamente
+- Procesar el contenido técnico
+- Generar un análisis útil
+- Responder preguntas sobre el documento
+
+Si estás leyendo esto, el sistema de análisis de archivos está funcionando perfectamente.

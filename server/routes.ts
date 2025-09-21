@@ -492,23 +492,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Process attached files if any (demo mode)
+        // Process attached files using real analysis (even in demo mode)
         if (attachmentIds && Array.isArray(attachmentIds) && attachmentIds.length > 0) {
           try {
             const fileAnalyses = [];
             for (const attachmentId of attachmentIds) {
-              // For demo mode, we'll create mock file analysis
-              const mockAnalysis = `[DEMO MODE] File ${attachmentId}: This would contain AI analysis of the uploaded file in a real scenario. The file has been processed and analyzed with AI capabilities.`;
-              fileAnalyses.push(mockAnalysis);
+              try {
+                // Always try to get attachment from storage, regardless of demo mode
+                const attachment = await storage.getAttachment(attachmentId, userId);
+                
+                if (attachment) {
+                  // Check if analysis is already available in metadata
+                  const metadata = attachment.metadata as any || {};
+                  if (metadata.aiAnalysis && metadata.analysisStatus === 'completed') {
+                    fileAnalyses.push(`📎 ${attachment.originalName}: ${metadata.aiAnalysis}`);
+                  } else if (metadata.analysisStatus === 'pending') {
+                    fileAnalyses.push(`📎 ${attachment.originalName}: [Analizando...] Este archivo está siendo procesado con IA.`);
+                  } else if (metadata.analysisStatus === 'error') {
+                    fileAnalyses.push(`📎 ${attachment.originalName}: Error al analizar el archivo. Archivo disponible pero sin análisis de IA.`);
+                  } else {
+                    // No analysis available, provide basic file info
+                    fileAnalyses.push(`📎 ${attachment.originalName} (${attachment.mimeType}): Archivo disponible.`);
+                  }
+                } else {
+                  fileAnalyses.push(`📎 Archivo ${attachmentId}: No encontrado o sin acceso.`);
+                }
+              } catch (attachmentError) {
+                console.error(`Error processing attachment ${attachmentId}:`, attachmentError);
+                fileAnalyses.push(`📎 Error procesando archivo ${attachmentId}.`);
+              }
             }
             
             if (fileAnalyses.length > 0) {
-              enhancedPrompt += `\n\nArchivos adjuntos analizados:\n${fileAnalyses
+              enhancedPrompt += `\n\nArchivos adjuntos:\n${fileAnalyses
                 .map((analysis: string, index: number) => `${index + 1}. ${analysis}`)
                 .join('\n')}`;
             }
           } catch (error) {
-            console.error("File analysis error (demo mode):", error);
+            console.error("File analysis error:", error);
           }
         }
 
@@ -784,21 +805,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         }
 
-        // In demo mode, simulate file upload
+        // Handle demo mode with real file upload but async analysis
         if (req.user?.isDemo) {
-          const demoAttachment = {
-            id: `demo-file-${Date.now()}`,
-            filename: `demo_${req.file.originalname}`,
-            originalName: req.file.originalname,
-            mimeType: req.file.mimetype,
-            size: req.file.size,
-            url: '/demo/file/url',
-            createdAt: new Date(),
-          };
+          // Use real file service for demo mode too - analysis happens asynchronously
+          const result = await fileService.saveFile(req.file, userId);
+          
           return res.json({
             success: true,
-            attachment: demoAttachment,
-            message: 'File uploaded successfully (demo mode)'
+            attachment: result.attachment,
+            url: result.url,
+            message: 'File uploaded and being analyzed (demo mode)'
           });
         }
 

@@ -1,0 +1,25 @@
+Informe de Proyecto - Sistema de IA
+========================================
+
+Resumen Ejecutivo:
+Este documento describe la implementación de un sistema de análisis de archivos con inteligencia artificial.
+
+Objetivos:
+1. Permitir carga de archivos de diferentes tipos (texto, imágenes, documentos)
+2. Análisis automático con IA para extraer información relevante
+3. Integración con chatbot para discutir el contenido
+
+Tecnologías Utilizadas:
+- Google Gemini API para análisis de texto e imágenes
+- Node.js/Express para backend
+- React para frontend
+- TypeScript para tipado seguro
+
+Resultados Esperados:
+- La IA debería ser capaz de leer este archivo
+- Extraer los puntos clave mencionados
+- Proporcionar un resumen útil del contenido
+- Responder preguntas sobre la información contenida
+
+Conclusión:
+Este archivo de prueba contiene información estructurada para verificar las capacidades de análisis de la IA.

@@ -1,0 +1,27 @@
+Reporte de Análisis - Sistema de IA
+===================================
+
+Introducción:
+Este documento es una prueba del sistema de análisis de archivos que utiliza inteligencia artificial para leer y procesar documentos automáticamente.
+
+Funcionalidades clave:
+1. Lectura automática de archivos de texto
+2. Análisis del contenido usando IA avanzada
+3. Generación de resúmenes inteligentes
+4. Extracción de información relevante
+
+Tecnologías utilizadas:
+- Google Gemini para procesamiento de lenguaje natural
+- Node.js para el servidor backend
+- React para la interfaz de usuario
+- Drizzle ORM para gestión de base de datos
+
+Objetivo de la prueba:
+Verificar que el sistema puede:
+- Procesar este archivo correctamente
+- Analizar el contenido técnico
+- Generar insights útiles sobre el proyecto
+- Responder preguntas específicas del documento
+
+Conclusión:
+Si puedes leer esto, el sistema de análisis de archivos está funcionando correctamente.

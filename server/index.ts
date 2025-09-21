@@ -45,6 +45,28 @@ export async function createApp() {
 
   const server = await registerRoutes(app);
 
+  // Initialize demo user on startup
+  try {
+    const { storage } = await import('./storage.js');
+    const demoUser = {
+      id: '00000000-0000-4000-8000-000000000000',
+      email: 'demo@example.com',
+      firstName: 'Demo',
+      lastName: 'User'
+    };
+    
+    // Check if demo user exists, if not create it
+    const existingDemoUser = await storage.getUser(demoUser.id);
+    if (!existingDemoUser) {
+      await storage.upsertUser(demoUser);
+      AppLogger.info('Demo user created successfully');
+    } else {
+      AppLogger.info('Demo user already exists');
+    }
+  } catch (error) {
+    AppLogger.error('Failed to initialize demo user', error);
+  }
+
   // Setup periodic cache cleanup (every 6 hours in production)
   if (config.deployment.isProduction) {
     setInterval(async () => {

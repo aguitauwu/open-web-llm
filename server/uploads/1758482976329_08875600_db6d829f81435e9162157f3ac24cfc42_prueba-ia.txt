@@ -1,0 +1,25 @@
+Proyecto de IA - Análisis de Documentos
+=====================================
+
+Descripción del Proyecto:
+Este sistema permite analizar automáticamente documentos de texto usando inteligencia artificial avanzada.
+
+Características principales:
+1. Análisis de contenido automático
+2. Extracción de información clave
+3. Resumen inteligente de documentos
+4. Integración con múltiples modelos de IA
+
+Tecnologías:
+- Gemini AI para análisis de texto
+- Node.js para el backend
+- React para la interfaz de usuario
+
+Objetivo de esta prueba:
+Verificar que la IA puede:
+- Leer correctamente este archivo de texto
+- Entender el contenido sobre el proyecto de IA
+- Generar un resumen útil de la información
+- Responder preguntas específicas sobre el contenido
+
+Estado: Esta es una prueba funcional del sistema de análisis de archivos.

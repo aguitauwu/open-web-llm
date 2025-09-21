@@ -149,9 +149,9 @@ export const optionalAuth: RequestHandler = (req: any, res, next) => {
     return next();
   }
   
-  // Si no está autenticado, crear usuario demo temporal
+  // Si no está autenticado, crear usuario demo temporal con UUID válido
   req.user = {
-    id: 'demo-user',
+    id: '00000000-0000-4000-8000-000000000000', // UUID fijo para usuario demo
     email: 'demo@example.com',
     firstName: 'Demo',
     lastName: 'User',

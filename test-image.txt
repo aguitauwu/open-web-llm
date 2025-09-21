@@ -1,9 +1,0 @@
-Este es un archivo de prueba para verificar el análisis de archivos con IA.
-El contenido incluye texto simple para que sea analizado.
-
-Información importante:
-- Nombre: Archivo de prueba
-- Tipo: Documento de texto
-- Propósito: Verificar funcionalidad de análisis IA
-
-Esperamos que la IA pueda leer y analizar este contenido correctamente.

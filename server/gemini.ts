@@ -292,6 +292,11 @@ export async function analyzeTextFile(filePath: string, prompt: string = "Summar
 // Función unificada para analizar cualquier tipo de archivo
 export async function analyzeFile(filePath: string, mimeType: string, customPrompt?: string): Promise<string> {
     try {
+        // Verificar que las API keys estén disponibles antes de intentar análisis
+        if (!process.env.GEMINI_API_KEY && !process.env.MISTRAL_API_KEY && !process.env.OPENROUTER_API_KEY) {
+            return `Archivo ${path.basename(filePath)} subido correctamente. El análisis de IA no está disponible (claves API no configuradas).`;
+        }
+
         // Determinar el tipo de análisis basado en el MIME type
         if (mimeType.startsWith('image/')) {
             const prompt = customPrompt || "Describe this image in detail. If there's text in the image, extract and transcribe it. If it's a diagram, chart, or infographic, explain its content and meaning.";
@@ -309,7 +314,17 @@ export async function analyzeFile(filePath: string, mimeType: string, customProm
             return `Este archivo es de tipo ${mimeType}. El análisis automático de este tipo de archivo no está disponible, pero el archivo ha sido subido correctamente y está disponible para descargar.`;
         }
     } catch (error) {
-        AppLogger.error("File analysis error", { filePath, mimeType, error });
-        return `No se pudo analizar este archivo (${mimeType}). El archivo se ha subido correctamente pero el análisis automático falló.`;
+        AppLogger.error("File analysis error", { filePath: path.basename(filePath), mimeType, error: error instanceof Error ? error.message : 'Unknown error' });
+        
+        // Proporcionar mensaje más específico basado en el tipo de error
+        if (error instanceof Error) {
+            if (error.message.includes('certificate') || error.message.includes('SSL') || error.message.includes('TLS')) {
+                return `Archivo ${path.basename(filePath)} subido correctamente. Análisis de IA temporalmente no disponible (error de conectividad).`;
+            } else if (error.message.includes('API key') || error.message.includes('Authentication')) {
+                return `Archivo ${path.basename(filePath)} subido correctamente. Análisis de IA no disponible (error de autenticación).`;
+            }
+        }
+        
+        return `Archivo ${path.basename(filePath)} subido correctamente. El análisis automático no pudo completarse, pero el archivo está disponible.`;
     }
 }
