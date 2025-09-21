@@ -56,6 +56,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
               type="button"
               onClick={() => setIncludeWebSearch(!includeWebSearch)}
               disabled={isLoading}
+              aria-pressed={includeWebSearch}
               className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg border transition-colors focus-visible:ring-1 focus-visible:ring-gray-300 ${
                 includeWebSearch
                   ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
@@ -72,6 +73,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
               type="button"
               onClick={() => setIncludeYouTubeSearch(!includeYouTubeSearch)}
               disabled={isLoading}
+              aria-pressed={includeYouTubeSearch}
               className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg border transition-colors focus-visible:ring-1 focus-visible:ring-gray-300 ${
                 includeYouTubeSearch
                   ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
@@ -88,6 +90,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
               type="button"
               onClick={() => setIncludeImageSearch(!includeImageSearch)}
               disabled={isLoading}
+              aria-pressed={includeImageSearch}
               className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg border transition-colors focus-visible:ring-1 focus-visible:ring-gray-300 ${
                 includeImageSearch
                   ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900 border-gray-900 dark:border-gray-100'
@@ -116,6 +119,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Message Stelluna..."
+                aria-label="Message input"
                 className="min-h-[48px] max-h-32 resize-none pr-20 border-0 bg-transparent focus:ring-0 focus:outline-none text-base placeholder:text-gray-500 dark:placeholder:text-gray-400"
                 disabled={isLoading}
                 data-testid="input-message"
@@ -129,6 +133,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                   size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
                   title="Attach file (coming soon)"
+                  aria-label="Attach file (coming soon)"
                   disabled={true}
                   data-testid="button-attach-file"
                   onClick={() => {
@@ -145,6 +150,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                   size="icon"
                   disabled={!message.trim() || isLoading}
                   title="Send message"
+                  aria-label="Send message"
                   data-testid="button-send-message"
                   className={`h-8 w-8 ${
                     !message.trim() || isLoading

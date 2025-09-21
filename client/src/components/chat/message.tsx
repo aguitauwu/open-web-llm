@@ -279,13 +279,14 @@ export function Message({ message, onRegenerate }: MessageProps) {
           </div>
           
           {!isUser && (
-            <div className="flex items-center space-x-1 opacity-0 md:group-hover:opacity-100 md:opacity-0 opacity-100 transition-opacity">
+            <div className="flex items-center space-x-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity">
               <Button
                 variant="ghost"
                 size="icon"
                 className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:ring-1 focus-visible:ring-gray-300"
                 onClick={handleCopy}
                 title="Copy message"
+                aria-label="Copy message"
                 data-testid="button-copy-message"
               >
                 <Copy className="h-3 w-3" />
@@ -297,6 +298,7 @@ export function Message({ message, onRegenerate }: MessageProps) {
                   className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:ring-1 focus-visible:ring-gray-300"
                   onClick={onRegenerate}
                   title="Regenerate"
+                  aria-label="Regenerate response"
                   data-testid="button-regenerate-message"
                 >
                   <RotateCcw className="h-3 w-3" />
@@ -308,6 +310,7 @@ export function Message({ message, onRegenerate }: MessageProps) {
                 className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:ring-1 focus-visible:ring-gray-300"
                 onClick={handleShare}
                 title="Share"
+                aria-label="Share message"
                 data-testid="button-share-message"
               >
                 <Share className="h-3 w-3" />
