@@ -3,6 +3,8 @@ import {
   conversations,
   messages,
   searchResults,
+  attachments,
+  messageAttachments,
   type User,
   type UpsertUser,
   type Conversation,
@@ -11,6 +13,10 @@ import {
   type InsertMessage,
   type SearchResult,
   type InsertSearchResult,
+  type Attachment,
+  type InsertAttachment,
+  type MessageAttachment,
+  type InsertMessageAttachment,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, sql, lt } from "drizzle-orm";
@@ -38,6 +44,15 @@ export interface IStorage {
   getCachedSearchResults(query: string, type: string): Promise<SearchResult | undefined>;
   cacheSearchResults(searchResult: InsertSearchResult): Promise<SearchResult>;
   cleanupOldSearchCache(olderThanMs?: number): Promise<void>;
+  
+  // File attachment operations
+  createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment>;
+  getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined>;
+  getUserAttachments(userId: string, limit?: number, offset?: number): Promise<Attachment[]>;
+  getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]>;
+  linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment>;
+  unlinkAttachmentFromMessage(messageId: string, attachmentId: string): Promise<void>;
+  deleteAttachment(attachmentId: string, userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -168,6 +183,96 @@ export class DatabaseStorage implements IStorage {
     await db
       .delete(searchResults)
       .where(lt(searchResults.createdAt, cutoffDate));
+  }
+
+  // File attachment operations
+  async createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment> {
+    const [newAttachment] = await db
+      .insert(attachments)
+      .values({ ...attachment, userId })
+      .returning();
+    return newAttachment;
+  }
+
+  async getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined> {
+    const [attachment] = await db
+      .select()
+      .from(attachments)
+      .where(and(
+        eq(attachments.id, attachmentId),
+        eq(attachments.userId, userId)
+      ));
+    return attachment;
+  }
+
+  async getUserAttachments(userId: string, limit: number = 50, offset: number = 0): Promise<Attachment[]> {
+    return await db
+      .select()
+      .from(attachments)
+      .where(eq(attachments.userId, userId))
+      .orderBy(desc(attachments.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]> {
+    // First verify the message belongs to a conversation owned by the user
+    const [message] = await db
+      .select({ conversationId: messages.conversationId })
+      .from(messages)
+      .where(eq(messages.id, messageId));
+    
+    if (!message) {
+      throw new Error("Message not found");
+    }
+
+    const conversation = await this.getConversation(message.conversationId, userId);
+    if (!conversation) {
+      throw new Error("Access denied");
+    }
+
+    return await db
+      .select({
+        id: attachments.id,
+        userId: attachments.userId,
+        filename: attachments.filename,
+        originalName: attachments.originalName,
+        mimeType: attachments.mimeType,
+        size: attachments.size,
+        path: attachments.path,
+        isPublic: attachments.isPublic,
+        metadata: attachments.metadata,
+        createdAt: attachments.createdAt,
+      })
+      .from(messageAttachments)
+      .innerJoin(attachments, eq(messageAttachments.attachmentId, attachments.id))
+      .where(eq(messageAttachments.messageId, messageId));
+  }
+
+  async linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment> {
+    const [link] = await db
+      .insert(messageAttachments)
+      .values({ messageId, attachmentId })
+      .returning();
+    return link;
+  }
+
+  async unlinkAttachmentFromMessage(messageId: string, attachmentId: string): Promise<void> {
+    await db
+      .delete(messageAttachments)
+      .where(and(
+        eq(messageAttachments.messageId, messageId),
+        eq(messageAttachments.attachmentId, attachmentId)
+      ));
+  }
+
+  async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
+    await db
+      .delete(attachments)
+      .where(and(
+        eq(attachments.id, attachmentId),
+        eq(attachments.userId, userId)
+      ));
   }
 }
 

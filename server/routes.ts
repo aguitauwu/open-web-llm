@@ -15,6 +15,13 @@ import {
   validateAIPrompt,
   sanitizePrompt
 } from "./validators/index.js";
+import { fileService, FileService } from "./services/fileService.js";
+import { 
+  validateFileUpload, 
+  validateFileQuery,
+  validateUUIDParam as validateFileUUIDParam
+} from "./validators/fileValidators.js";
+import multer from "multer";
 import { AppLogger } from "./utils/logger.js";
 
 // AI integration with fallback for all providers
@@ -685,6 +692,194 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to perform YouTube search" });
     }
   });
+
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 10 * 1024 * 1024, // 10MB limit
+    },
+  });
+
+  // File upload routes
+  app.post('/api/files/upload', 
+    optionalAuth, 
+    upload.single('file'), 
+    validateFileUpload, 
+    async (req: any, res: any) => {
+      try {
+        const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
+        
+        if (!req.file) {
+          return res.status(400).json({ 
+            error: 'No file provided',
+            message: 'Please select a file to upload' 
+          });
+        }
+
+        // In demo mode, simulate file upload
+        if (req.user?.isDemo) {
+          const demoAttachment = {
+            id: `demo-file-${Date.now()}`,
+            filename: `demo_${req.file.originalname}`,
+            originalName: req.file.originalname,
+            mimeType: req.file.mimetype,
+            size: req.file.size,
+            url: '/demo/file/url',
+            createdAt: new Date(),
+          };
+          return res.json({
+            success: true,
+            attachment: demoAttachment,
+            message: 'File uploaded successfully (demo mode)'
+          });
+        }
+
+        const result = await fileService.saveFile(req.file, userId);
+        
+        // Optionally link to message if provided
+        if (req.body.attachToMessage) {
+          try {
+            await storage.linkAttachmentToMessage(req.body.attachToMessage, result.attachment.id);
+          } catch (error) {
+            // File uploaded but linking failed - still return success
+            console.warn('Failed to link attachment to message:', error);
+          }
+        }
+
+        res.json({
+          success: true,
+          attachment: result.attachment,
+          url: result.url,
+          message: 'File uploaded successfully'
+        });
+
+      } catch (error) {
+        console.error('File upload error:', error);
+        res.status(500).json({ 
+          error: 'Upload failed',
+          message: error instanceof Error ? error.message : 'Unknown upload error'
+        });
+      }
+    }
+  );
+
+  // Get user files
+  app.get('/api/files', 
+    optionalAuth, 
+    validateFileQuery, 
+    async (req: any, res: any) => {
+      try {
+        const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
+        
+        if (req.user?.isDemo) {
+          // Return demo files
+          return res.json([]);
+        }
+
+        const { limit = 20, offset = 0, type } = req.query;
+        const attachments = await storage.getUserAttachments(userId, limit, offset);
+        
+        // Filter by type if specified
+        let filteredAttachments = attachments;
+        if (type && type !== 'all') {
+          filteredAttachments = attachments.filter(attachment => {
+            if (type === 'image') return FileService.isImageFile(attachment.mimeType);
+            if (type === 'document') return FileService.isDocumentFile(attachment.mimeType);
+            return true;
+          });
+        }
+
+        res.json(filteredAttachments);
+      } catch (error) {
+        console.error('Error fetching files:', error);
+        res.status(500).json({ 
+          error: 'Failed to fetch files',
+          message: 'Unable to retrieve user files'
+        });
+      }
+    }
+  );
+
+  // Get specific file
+  app.get('/api/files/:id', 
+    optionalAuth, 
+    validateFileUUIDParam('id'), 
+    async (req: any, res: any) => {
+      try {
+        const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
+        
+        if (req.user?.isDemo) {
+          return res.status(404).json({ error: 'File not found in demo mode' });
+        }
+
+        const { stream, attachment } = await fileService.getFileStream(req.params.id, userId);
+        
+        // Set appropriate headers
+        res.set({
+          'Content-Type': attachment.mimeType,
+          'Content-Length': attachment.size.toString(),
+          'Content-Disposition': `inline; filename="${attachment.originalName}"`,
+        });
+
+        stream.pipe(res);
+      } catch (error) {
+        console.error('Error serving file:', error);
+        res.status(404).json({ 
+          error: 'File not found',
+          message: 'The requested file could not be found'
+        });
+      }
+    }
+  );
+
+  // Delete file
+  app.delete('/api/files/:id', 
+    optionalAuth, 
+    validateFileUUIDParam('id'), 
+    async (req: any, res: any) => {
+      try {
+        const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
+        
+        if (req.user?.isDemo) {
+          return res.json({ message: 'File deleted successfully (demo mode)' });
+        }
+
+        await fileService.deleteFile(req.params.id, userId);
+        res.json({ message: 'File deleted successfully' });
+      } catch (error) {
+        console.error('Error deleting file:', error);
+        res.status(500).json({ 
+          error: 'Failed to delete file',
+          message: error instanceof Error ? error.message : 'Unknown deletion error'
+        });
+      }
+    }
+  );
+
+  // Get message attachments
+  app.get('/api/messages/:id/attachments', 
+    optionalAuth, 
+    validateFileUUIDParam('id'), 
+    async (req: any, res: any) => {
+      try {
+        const userId = req.user?.claims?.sub || req.user?.id || 'demo-user';
+        
+        if (req.user?.isDemo) {
+          return res.json([]);
+        }
+
+        const attachments = await storage.getMessageAttachments(req.params.id, userId);
+        res.json(attachments);
+      } catch (error) {
+        console.error('Error fetching message attachments:', error);
+        res.status(500).json({ 
+          error: 'Failed to fetch attachments',
+          message: 'Unable to retrieve message attachments'
+        });
+      }
+    }
+  );
 
   const httpServer = createServer(app);
   return httpServer;

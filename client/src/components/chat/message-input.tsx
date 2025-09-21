@@ -4,26 +4,43 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { FileUploadButton } from "@/components/file-upload/file-upload-button";
 import { Paperclip, Send, Search, Youtube, Image } from "lucide-react";
+import type { FileAttachment } from "@/types/files";
 
 interface MessageInputProps {
   onSendMessage: (message: string, options: { includeWebSearch: boolean; includeYouTubeSearch: boolean; includeImageSearch: boolean }) => void;
   isLoading: boolean;
+  conversationId?: string;
 }
 
-export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
+export function MessageInput({ onSendMessage, isLoading, conversationId }: MessageInputProps) {
   const [message, setMessage] = useState("");
   const [includeWebSearch, setIncludeWebSearch] = useState(false);
   const [includeYouTubeSearch, setIncludeYouTubeSearch] = useState(false);
   const [includeImageSearch, setIncludeImageSearch] = useState(false);
+  const [attachedFiles, setAttachedFiles] = useState<FileAttachment[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { toast } = useToast();
+
+  const handleFileUpload = (file: FileAttachment) => {
+    setAttachedFiles(prev => [...prev, file]);
+    toast({
+      title: "File attached",
+      description: `${file.originalName} is ready to send with your message`,
+    });
+  };
+
+  const removeAttachedFile = (fileId: string) => {
+    setAttachedFiles(prev => prev.filter(f => f.id !== fileId));
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !isLoading) {
       onSendMessage(message.trim(), { includeWebSearch, includeYouTubeSearch, includeImageSearch });
       setMessage("");
+      setAttachedFiles([]);
       setIncludeWebSearch(false);
       setIncludeYouTubeSearch(false);
       setIncludeImageSearch(false);
@@ -129,26 +146,13 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
               
               {/* Buttons container */}
               <div className="absolute right-3 bottom-3 flex items-center space-x-2">
-                <Button
-                  type="button"
+                <FileUploadButton
+                  onUploadSuccess={handleFileUpload}
+                  disabled={isLoading}
                   variant="ghost"
                   size="icon"
                   className="h-8 w-8 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-                  title="Attach file (coming soon)"
-                  aria-label="Attach file (coming soon)"
-                  disabled={true}
-                  data-testid="button-attach-file"
-                  onClick={() => {
-                    // File attachment not implemented yet - show info toast
-                    toast({
-                      title: "Próximamente",
-                      description: "La función de adjuntar archivos estará disponible pronto.",
-                      variant: "default"
-                    });
-                  }}
-                >
-                  <Paperclip className="h-4 w-4" />
-                </Button>
+                />
                 
                 {/* Send Button */}
                 <Button

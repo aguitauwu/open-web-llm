@@ -8,6 +8,9 @@ import {
   type InsertMessage,
   type SearchResult,
   type InsertSearchResult,
+  type Attachment,
+  type InsertAttachment,
+  type MessageAttachment,
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -161,5 +164,34 @@ export class MongoStorage implements IStorage {
     await this.searchResults.deleteMany({
       createdAt: { $lt: cutoffDate }
     });
+  }
+
+  // File attachment operations - TODO: Implement for MongoDB
+  async createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment> {
+    throw new Error("File attachments not implemented for MongoDB storage");
+  }
+
+  async getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined> {
+    throw new Error("File attachments not implemented for MongoDB storage");
+  }
+
+  async getUserAttachments(userId: string, limit?: number, offset?: number): Promise<Attachment[]> {
+    throw new Error("File attachments not implemented for MongoDB storage");
+  }
+
+  async getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]> {
+    throw new Error("File attachments not implemented for MongoDB storage");
+  }
+
+  async linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment> {
+    throw new Error("File attachments not implemented for MongoDB storage");
+  }
+
+  async unlinkAttachmentFromMessage(messageId: string, attachmentId: string): Promise<void> {
+    throw new Error("File attachments not implemented for MongoDB storage");
+  }
+
+  async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
+    throw new Error("File attachments not implemented for MongoDB storage");
   }
 }

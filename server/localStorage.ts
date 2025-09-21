@@ -7,6 +7,9 @@ import {
   type InsertMessage,
   type SearchResult,
   type InsertSearchResult,
+  type Attachment,
+  type InsertAttachment,
+  type MessageAttachment,
 } from "@shared/schema";
 import { IStorage } from "./storage";
 
@@ -231,5 +234,34 @@ export class LocalStorage implements IStorage {
   destroy() {
     this.stopAutoSave();
     this.saveToLocalStorage(); // Final save
+  }
+
+  // File attachment operations - TODO: Implement for Local storage
+  async createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment> {
+    throw new Error("File attachments not implemented for Local storage");
+  }
+
+  async getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined> {
+    throw new Error("File attachments not implemented for Local storage");
+  }
+
+  async getUserAttachments(userId: string, limit?: number, offset?: number): Promise<Attachment[]> {
+    throw new Error("File attachments not implemented for Local storage");
+  }
+
+  async getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]> {
+    throw new Error("File attachments not implemented for Local storage");
+  }
+
+  async linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment> {
+    throw new Error("File attachments not implemented for Local storage");
+  }
+
+  async unlinkAttachmentFromMessage(messageId: string, attachmentId: string): Promise<void> {
+    throw new Error("File attachments not implemented for Local storage");
+  }
+
+  async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
+    throw new Error("File attachments not implemented for Local storage");
   }
 }

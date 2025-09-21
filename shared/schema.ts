@@ -8,6 +8,7 @@ import {
   varchar,
   uuid,
   boolean,
+  integer,
 } from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
@@ -80,9 +81,46 @@ export const searchResults = pgTable("search_results", {
   index("idx_search_created").on(table.createdAt),
 ]);
 
+// File attachments
+export const attachments = pgTable("attachments", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  filename: varchar("filename").notNull(),
+  originalName: varchar("original_name").notNull(),
+  mimeType: varchar("mime_type").notNull(),
+  size: integer("size").notNull(), // File size in bytes
+  path: text("path").notNull(), // Local file path or cloud URL
+  isPublic: boolean("is_public").default(false),
+  metadata: jsonb("metadata"), // Additional file metadata (dimensions, duration, etc.)
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  // Índice para consultas por usuario
+  index("idx_attachments_user").on(table.userId),
+  // Índice para búsquedas por tipo de archivo
+  index("idx_attachments_mime_type").on(table.mimeType),
+  // Índice para consultas por fecha
+  index("idx_attachments_created").on(table.createdAt),
+]);
+
+// Message attachments (many-to-many relationship)
+export const messageAttachments = pgTable("message_attachments", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: uuid("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  attachmentId: uuid("attachment_id").notNull().references(() => attachments.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  // Índice único para evitar duplicados
+  index("idx_message_attachments_unique").on(table.messageId, table.attachmentId),
+  // Índice para consultas por mensaje
+  index("idx_message_attachments_message").on(table.messageId),
+  // Índice para consultas por archivo
+  index("idx_message_attachments_attachment").on(table.attachmentId),
+]);
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   conversations: many(conversations),
+  attachments: many(attachments),
 }));
 
 export const conversationsRelations = relations(conversations, ({ one, many }) => ({
@@ -93,10 +131,30 @@ export const conversationsRelations = relations(conversations, ({ one, many }) =
   messages: many(messages),
 }));
 
-export const messagesRelations = relations(messages, ({ one }) => ({
+export const messagesRelations = relations(messages, ({ one, many }) => ({
   conversation: one(conversations, {
     fields: [messages.conversationId],
     references: [conversations.id],
+  }),
+  messageAttachments: many(messageAttachments),
+}));
+
+export const attachmentsRelations = relations(attachments, ({ one, many }) => ({
+  user: one(users, {
+    fields: [attachments.userId],
+    references: [users.id],
+  }),
+  messageAttachments: many(messageAttachments),
+}));
+
+export const messageAttachmentsRelations = relations(messageAttachments, ({ one }) => ({
+  message: one(messages, {
+    fields: [messageAttachments.messageId],
+    references: [messages.id],
+  }),
+  attachment: one(attachments, {
+    fields: [messageAttachments.attachmentId],
+    references: [attachments.id],
   }),
 }));
 
@@ -119,6 +177,21 @@ export const insertSearchResultSchema = createInsertSchema(searchResults).pick({
   results: true,
 });
 
+export const insertAttachmentSchema = createInsertSchema(attachments).pick({
+  filename: true,
+  originalName: true,
+  mimeType: true,
+  size: true,
+  path: true,
+  isPublic: true,
+  metadata: true,
+});
+
+export const insertMessageAttachmentSchema = createInsertSchema(messageAttachments).pick({
+  messageId: true,
+  attachmentId: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -134,3 +207,7 @@ export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
 export type InsertSearchResult = z.infer<typeof insertSearchResultSchema>;
 export type SearchResult = typeof searchResults.$inferSelect;
+export type InsertAttachment = z.infer<typeof insertAttachmentSchema>;
+export type Attachment = typeof attachments.$inferSelect;
+export type InsertMessageAttachment = z.infer<typeof insertMessageAttachmentSchema>;
+export type MessageAttachment = typeof messageAttachments.$inferSelect;

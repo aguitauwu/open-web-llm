@@ -269,6 +269,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
       <MessageInput
         onSendMessage={handleSendMessage}
         isLoading={sendMessageMutation.isPending}
+        conversationId={selectedConversation}
       />
     </div>
   );
