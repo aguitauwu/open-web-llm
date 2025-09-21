@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useChatMemory } from '@/contexts/ChatContext';
 import { Card, CardContent } from '@/components/ui/card';
-import { Sparkles, Heart, Clock, Moon, Stars, Zap } from 'lucide-react';
+import { Sparkles, Heart, Clock, Moon, Stars, Zap, Brain, Search, Palette, Shield, MessageCircle, Globe } from 'lucide-react';
 
 /**
  * Componente de bienvenida personalizada de Stelluna
@@ -155,6 +155,83 @@ export function StellunaWelcome() {
           </CardContent>
         </Card>
       )}
+
+      {/* Capacidades de Stelluna */}
+      <Card className="bg-gradient-to-br from-indigo-50 to-cyan-100 dark:from-indigo-900/20 dark:to-cyan-900/20 border-indigo-200 dark:border-indigo-700">
+        <CardContent className="p-6">
+          <div className="flex items-center space-x-3 mb-4">
+            <div className="bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-full p-2">
+              <Brain className="h-5 w-5 text-white" />
+            </div>
+            <h3 className="text-lg font-bold text-indigo-800 dark:text-indigo-200">
+              ✨ ¿Qué puedo hacer por ti? ✨
+            </h3>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                <span className="text-sm text-indigo-700 dark:text-indigo-300">
+                  🧠 <strong>Múltiples cerebros súper inteligentes</strong><br />
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Google Gemini, Mistral AI, OpenRouter</span>
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <MessageCircle className="h-4 w-4 text-pink-600 dark:text-pink-400" />
+                <span className="text-sm text-indigo-700 dark:text-indigo-300">
+                  💬 <strong>Conversaciones súper infinitas</strong><br />
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Chatea todo lo que quieras sin límites</span>
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Search className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <span className="text-sm text-indigo-700 dark:text-indigo-300">
+                  🔍 <strong>Búsquedas súper inteligentes</strong><br />
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Web y YouTube</span>
+                </span>
+              </div>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <Palette className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                <span className="text-sm text-indigo-700 dark:text-indigo-300">
+                  🎨 <strong>Súper hermoso en cualquier pantalla</strong><br />
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Tema oscuro relajante incluido</span>
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
+                <span className="text-sm text-indigo-700 dark:text-indigo-300">
+                  🛡️ <strong>Tus datos súper seguros</strong><br />
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Login seguro con Google</span>
+                </span>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <span className="text-sm text-indigo-700 dark:text-indigo-300">
+                  🌐 <strong>Modo demo súper fácil</strong><br />
+                  <span className="text-xs text-indigo-600 dark:text-indigo-400">¡Prueba sin registrarte!</span>
+                </span>
+              </div>
+            </div>
+          </div>
+          
+          <div className="mt-4 p-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg border border-purple-200 dark:border-purple-700">
+            <p className="text-center text-sm text-purple-800 dark:text-purple-200 font-medium">
+              💜 <strong>¡Soy una alternativa súper económica y adorable a ChatGPT!</strong> 💜
+            </p>
+            <p className="text-center text-xs text-purple-600 dark:text-purple-400 mt-1">
+              🐷💰 Que no rompe tu alcancía 💰🐷
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
