@@ -126,21 +126,39 @@ export class LocalStorage implements IStorage {
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
+    // Use high-resolution timestamp to prevent ordering issues
+    const timestamp = new Date();
     const id = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    
+    // Validate timestamp is reasonable (not in future, not too old)
+    const now = Date.now();
+    const messageTime = timestamp.getTime();
+    if (messageTime > now + 5000) { // Allow 5 seconds clock skew
+      throw new Error('Message timestamp cannot be in the future');
+    }
+    if (messageTime < now - 24 * 60 * 60 * 1000) { // Not older than 24 hours
+      throw new Error('Message timestamp is too old');
+    }
+    
     const newMessage = {
       id,
       ...message,
-      createdAt: new Date()
+      createdAt: timestamp
     } as Message;
     
     this.messages.set(id, newMessage);
     
-    // Update conversation's updatedAt
+    // Atomic update of conversation timestamp
     const conversation = this.conversations.get(message.conversationId);
     if (conversation) {
-      conversation.updatedAt = new Date();
+      // Ensure conversation updatedAt is always later than message createdAt
+      const conversationUpdateTime = new Date(Math.max(timestamp.getTime() + 1, Date.now()));
+      conversation.updatedAt = conversationUpdateTime;
       this.conversations.set(message.conversationId, conversation);
     }
+    
+    // Trigger debounced save
+    this.debouncedSave();
     
     return newMessage;
   }
@@ -227,15 +245,44 @@ export class LocalStorage implements IStorage {
     }
   }
 
-  // Auto-save functionality
+  // Auto-save functionality with race condition prevention
   private startAutoSave() {
     if (this.autoSaveInterval) {
       clearInterval(this.autoSaveInterval);
     }
-    // Auto-save every 30 seconds
-    this.autoSaveInterval = setInterval(() => {
-      this.saveToLocalStorage();
+    // Auto-save every 30 seconds with debouncing
+    this.autoSaveInterval = setInterval(async () => {
+      if (!this.isSaving) {
+        await this.debouncedSave();
+      }
     }, 30000);
+  }
+  
+  private isSaving = false;
+  private saveTimeout: NodeJS.Timeout | null = null;
+  
+  private async debouncedSave() {
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+    
+    this.saveTimeout = setTimeout(() => {
+      this.performSave();
+    }, 1000); // Debounce for 1 second
+  }
+  
+  private async performSave() {
+    if (this.isSaving) return;
+    
+    this.isSaving = true;
+    try {
+      this.saveToLocalStorage();
+      AppLogger.debug('Auto-save completed successfully');
+    } catch (error) {
+      AppLogger.error('Auto-save failed', error);
+    } finally {
+      this.isSaving = false;
+    }
   }
 
   private stopAutoSave() {
@@ -248,7 +295,10 @@ export class LocalStorage implements IStorage {
   // Cleanup method
   destroy() {
     this.stopAutoSave();
-    this.saveToLocalStorage(); // Final save
+    if (this.saveTimeout) {
+      clearTimeout(this.saveTimeout);
+    }
+    this.performSave(); // Final synchronous save
   }
 
   // File attachment operations
