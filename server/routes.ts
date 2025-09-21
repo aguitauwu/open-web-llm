@@ -405,14 +405,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/conversations/:id/messages', aiLimiter, optionalAuth, validateCreateMessage, async (req: any, res: any) => {
+  app.post('/api/conversations/:id/messages', aiLimiter, optionalAuth, async (req: any, res: any) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const conversationId = req.params.id;
       const { content, model, includeWebSearch, includeYouTubeSearch, includeImageSearch } = req.body;
       
-      if (!content) {
+      // Validación básica
+      if (!content || typeof content !== 'string') {
         return res.status(400).json({ message: "Message content is required" });
+      }
+      
+      if (content.trim().length === 0) {
+        return res.status(400).json({ message: "Message content cannot be empty" });
+      }
+      
+      if (content.length > 10000) {
+        return res.status(400).json({ message: "Message content is too long" });
       }
 
       // For demo users, save messages to temporary storage
