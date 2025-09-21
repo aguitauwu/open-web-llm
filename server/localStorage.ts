@@ -18,6 +18,8 @@ export class LocalStorage implements IStorage {
   private conversations: Map<string, Conversation> = new Map();
   private messages: Map<string, Message> = new Map();
   private searchResults: Map<string, SearchResult> = new Map();
+  private attachments: Map<string, Attachment> = new Map();
+  private messageAttachments: Map<string, MessageAttachment> = new Map();
   private autoSaveInterval: NodeJS.Timeout | null = null;
 
   constructor() {
@@ -181,6 +183,8 @@ export class LocalStorage implements IStorage {
       localStorage.setItem('ai-chat-conversations', JSON.stringify(Array.from(this.conversations.entries())));
       localStorage.setItem('ai-chat-messages', JSON.stringify(Array.from(this.messages.entries())));
       localStorage.setItem('ai-chat-search', JSON.stringify(Array.from(this.searchResults.entries())));
+      localStorage.setItem('ai-chat-attachments', JSON.stringify(Array.from(this.attachments.entries())));
+      localStorage.setItem('ai-chat-message-attachments', JSON.stringify(Array.from(this.messageAttachments.entries())));
     }
   }
 
@@ -205,6 +209,16 @@ export class LocalStorage implements IStorage {
         const search = localStorage.getItem('ai-chat-search');
         if (search) {
           this.searchResults = new Map(JSON.parse(search));
+        }
+        
+        const attachments = localStorage.getItem('ai-chat-attachments');
+        if (attachments) {
+          this.attachments = new Map(JSON.parse(attachments));
+        }
+        
+        const messageAttachments = localStorage.getItem('ai-chat-message-attachments');
+        if (messageAttachments) {
+          this.messageAttachments = new Map(JSON.parse(messageAttachments));
         }
       } catch (error) {
         console.warn('Failed to load from localStorage:', error);
@@ -236,32 +250,97 @@ export class LocalStorage implements IStorage {
     this.saveToLocalStorage(); // Final save
   }
 
-  // File attachment operations - TODO: Implement for Local storage
+  // File attachment operations
   async createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment> {
-    throw new Error("File attachments not implemented for Local storage");
+    const attachmentId = `attachment_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const newAttachment = {
+      id: attachmentId,
+      userId,
+      ...attachment,
+      metadata: attachment.metadata || null,
+      isPublic: attachment.isPublic || false,
+      createdAt: new Date()
+    } as Attachment;
+    
+    this.attachments.set(attachmentId, newAttachment);
+    return newAttachment;
   }
 
   async getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined> {
-    throw new Error("File attachments not implemented for Local storage");
+    const attachment = this.attachments.get(attachmentId);
+    if (attachment && attachment.userId === userId) {
+      return attachment;
+    }
+    return undefined;
   }
 
   async getUserAttachments(userId: string, limit?: number, offset?: number): Promise<Attachment[]> {
-    throw new Error("File attachments not implemented for Local storage");
+    const userAttachments = Array.from(this.attachments.values())
+      .filter(attachment => attachment.userId === userId)
+      .sort((a, b) => {
+        const aTime = a.createdAt?.getTime() || 0;
+        const bTime = b.createdAt?.getTime() || 0;
+        return bTime - aTime;
+      });
+    
+    const start = offset || 0;
+    const end = limit ? start + limit : userAttachments.length;
+    return userAttachments.slice(start, end);
   }
 
   async getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]> {
-    throw new Error("File attachments not implemented for Local storage");
+    const messageAttachments = Array.from(this.messageAttachments.values())
+      .filter(ma => ma.messageId === messageId);
+    
+    const attachmentIds = messageAttachments.map(ma => ma.attachmentId);
+    const attachments = [];
+    
+    for (const attachmentId of attachmentIds) {
+      const attachment = this.attachments.get(attachmentId);
+      if (attachment && attachment.userId === userId) {
+        attachments.push(attachment);
+      }
+    }
+    
+    return attachments;
   }
 
   async linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment> {
-    throw new Error("File attachments not implemented for Local storage");
+    const linkId = `msg_att_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`;
+    const messageAttachment = {
+      id: linkId,
+      messageId,
+      attachmentId,
+      createdAt: new Date()
+    } as MessageAttachment;
+    
+    this.messageAttachments.set(linkId, messageAttachment);
+    return messageAttachment;
   }
 
   async unlinkAttachmentFromMessage(messageId: string, attachmentId: string): Promise<void> {
-    throw new Error("File attachments not implemented for Local storage");
+    const entries = Array.from(this.messageAttachments.entries());
+    for (const [id, ma] of entries) {
+      if (ma.messageId === messageId && ma.attachmentId === attachmentId) {
+        this.messageAttachments.delete(id);
+        break;
+      }
+    }
   }
 
   async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
-    throw new Error("File attachments not implemented for Local storage");
+    const attachment = this.attachments.get(attachmentId);
+    if (attachment && attachment.userId === userId) {
+      // First remove all message attachments that reference this attachment
+      const entries = Array.from(this.messageAttachments.entries());
+      for (const [id, ma] of entries) {
+        if (ma.attachmentId === attachmentId) {
+          this.messageAttachments.delete(id);
+        }
+      }
+      
+      // Then delete the attachment itself
+      this.attachments.delete(attachmentId);
+    }
   }
 }

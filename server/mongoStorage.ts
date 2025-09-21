@@ -21,6 +21,8 @@ export class MongoStorage implements IStorage {
   private conversations: Collection<Conversation>;
   private messages: Collection<Message>;
   private searchResults: Collection<SearchResult>;
+  private attachments: Collection<Attachment>;
+  private messageAttachments: Collection<MessageAttachment>;
 
   constructor(connectionString: string) {
     this.client = new MongoClient(connectionString);
@@ -29,6 +31,8 @@ export class MongoStorage implements IStorage {
     this.conversations = this.db.collection('conversations');
     this.messages = this.db.collection('messages');
     this.searchResults = this.db.collection('searchResults');
+    this.attachments = this.db.collection('attachments');
+    this.messageAttachments = this.db.collection('messageAttachments');
   }
 
   async connect() {
@@ -166,32 +170,76 @@ export class MongoStorage implements IStorage {
     });
   }
 
-  // File attachment operations - TODO: Implement for MongoDB
+  // File attachment operations
   async createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    const newAttachment = {
+      id: `attachment_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      userId,
+      ...attachment,
+      metadata: attachment.metadata || null,
+      isPublic: attachment.isPublic || false,
+      createdAt: new Date()
+    };
+    
+    await this.attachments.insertOne(newAttachment);
+    return newAttachment as Attachment;
   }
 
   async getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    const attachment = await this.attachments.findOne({ id: attachmentId, userId });
+    return attachment || undefined;
   }
 
   async getUserAttachments(userId: string, limit?: number, offset?: number): Promise<Attachment[]> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    let query = this.attachments.find({ userId }).sort({ createdAt: -1 });
+    
+    if (offset) {
+      query = query.skip(offset);
+    }
+    if (limit) {
+      query = query.limit(limit);
+    }
+    
+    return await query.toArray();
   }
 
   async getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    const messageAttachments = await this.messageAttachments.find({ messageId }).toArray();
+    const attachmentIds = messageAttachments.map(ma => ma.attachmentId);
+    
+    if (attachmentIds.length === 0) {
+      return [];
+    }
+    
+    const attachments = await this.attachments.find({
+      id: { $in: attachmentIds },
+      userId
+    }).toArray();
+    
+    return attachments;
   }
 
   async linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    const messageAttachment = {
+      id: `msg_att_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
+      messageId,
+      attachmentId,
+      createdAt: new Date()
+    };
+    
+    await this.messageAttachments.insertOne(messageAttachment);
+    return messageAttachment as MessageAttachment;
   }
 
   async unlinkAttachmentFromMessage(messageId: string, attachmentId: string): Promise<void> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    await this.messageAttachments.deleteOne({ messageId, attachmentId });
   }
 
   async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
-    throw new Error("File attachments not implemented for MongoDB storage");
+    // First remove all message attachments that reference this attachment
+    await this.messageAttachments.deleteMany({ attachmentId });
+    
+    // Then delete the attachment itself
+    await this.attachments.deleteOne({ id: attachmentId, userId });
   }
 }
