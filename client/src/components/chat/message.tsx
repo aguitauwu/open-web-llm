@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, RotateCcw, Share, Bot, Search, Youtube, Image, ChevronLeft, ChevronRight } from "lucide-react";
+import { Copy, RotateCcw, Share, Bot, Search, Youtube, Image, ChevronLeft, ChevronRight, FileText, Download, AlertCircle, Clock, CheckCircle } from "lucide-react";
 import stellunaImage from "../../assets/stelluna.jpg";
+import { formatFileSize, getFileIcon, isImageFile } from "@/types/files";
 import type { Message } from "@shared/schema";
 
 interface ImageGalleryProps {
@@ -261,6 +262,90 @@ export function Message({ message, onRegenerate }: MessageProps) {
               {metadata.searchResults.images && metadata.searchResults.images.length > 0 && (
                 <ImageGallery images={metadata.searchResults.images} />
               )}
+            </div>
+          )}
+
+          {/* File Attachments */}
+          {metadata?.attachments && metadata.attachments.length > 0 && (
+            <div className="mt-4">
+              <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-3">
+                <div className="flex items-center space-x-2 mb-3">
+                  <FileText className="h-4 w-4 text-purple-500" />
+                  <span className="text-sm font-medium text-purple-700 dark:text-purple-300">
+                    Attached Files ({metadata.attachments.length})
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {metadata.attachments.map((attachment: any, index: number) => (
+                    <div key={attachment.id || index} className="bg-white dark:bg-gray-800 rounded-lg p-3 border border-purple-200 dark:border-purple-800">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-start space-x-3 flex-1">
+                          <div className="flex-shrink-0">
+                            {isImageFile(attachment.mimeType) ? (
+                              <Image className="h-5 w-5 text-purple-500" />
+                            ) : (
+                              <span className="text-lg">{getFileIcon(attachment.mimeType)}</span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                              {attachment.originalName || attachment.filename}
+                            </p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">
+                              {attachment.mimeType} • {formatFileSize(attachment.size)}
+                            </p>
+                            
+                            {/* AI Analysis Status */}
+                            {attachment.metadata && (
+                              <div className="mt-2">
+                                {attachment.metadata.analysisStatus === 'completed' && attachment.metadata.aiAnalysis ? (
+                                  <div className="flex items-start space-x-2">
+                                    <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0 mt-0.5" />
+                                    <div className="flex-1">
+                                      <p className="text-xs font-medium text-green-700 dark:text-green-300 mb-1">AI Analysis:</p>
+                                      <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                                        {attachment.metadata.aiAnalysis}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ) : attachment.metadata.analysisStatus === 'pending' ? (
+                                  <div className="flex items-center space-x-2">
+                                    <Clock className="h-4 w-4 text-yellow-500 animate-pulse" />
+                                    <p className="text-xs text-yellow-700 dark:text-yellow-300">Analyzing with AI...</p>
+                                  </div>
+                                ) : attachment.metadata.analysisStatus === 'error' ? (
+                                  <div className="flex items-center space-x-2">
+                                    <AlertCircle className="h-4 w-4 text-red-500" />
+                                    <p className="text-xs text-red-700 dark:text-red-300">Analysis unavailable</p>
+                                  </div>
+                                ) : (
+                                  <div className="flex items-center space-x-2">
+                                    <FileText className="h-4 w-4 text-gray-400" />
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">File attached</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        {attachment.url && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            onClick={() => window.open(attachment.url, '_blank', 'noopener,noreferrer')}
+                            title="Download file"
+                            data-testid={`button-download-${attachment.id}`}
+                          >
+                            <Download className="h-3 w-3" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </div>

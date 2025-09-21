@@ -37,11 +37,12 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
   });
 
   const sendMessageMutation = useMutation({
-    mutationFn: async ({ content, includeWebSearch, includeYouTubeSearch, includeImageSearch }: {
+    mutationFn: async ({ content, includeWebSearch, includeYouTubeSearch, includeImageSearch, attachmentIds }: {
       content: string;
       includeWebSearch: boolean;
       includeYouTubeSearch: boolean;
       includeImageSearch: boolean;
+      attachmentIds?: string[];
     }) => {
       if (!selectedConversation) {
         throw new Error("No conversation selected");
@@ -54,6 +55,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
         includeWebSearch,
         includeYouTubeSearch,
         includeImageSearch,
+        attachmentIds,
       });
       return response.json();
     },
@@ -120,7 +122,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
     },
   });
 
-  const handleSendMessage = (content: string, options: { includeWebSearch: boolean; includeYouTubeSearch: boolean; includeImageSearch: boolean }) => {
+  const handleSendMessage = (content: string, options: { includeWebSearch: boolean; includeYouTubeSearch: boolean; includeImageSearch: boolean; attachmentIds?: string[] }) => {
     sendMessageMutation.mutate({ content, ...options });
   };
 
