@@ -1,21 +1,31 @@
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useCallback, memo } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { useChat, useChatActions } from "@/contexts/ChatContext";
+import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Sidebar } from "@/components/chat/sidebar";
 import { ChatArea } from "@/components/chat/chat-area";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { ChatAreaSkeleton } from "@/components/ui/skeleton";
 import type { Conversation } from "@shared/schema";
 
-function ChatContent() {
+const ChatContent = memo(function ChatContent() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedModel, setSelectedModel] = useState("Gemini 2.5 Flash");
-  const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { state } = useChat();
+  const { setModel, setConversation, setSidebar, setError } = useChatActions();
+  const { preferences, updatePreferences } = useUserPreferences();
+
+  // Sincronizar preferencias del usuario con el estado global
+  useEffect(() => {
+    if (preferences.selectedModel !== state.selectedModel) {
+      setModel(preferences.selectedModel);
+    }
+  }, [preferences.selectedModel, state.selectedModel, setModel]);
 
   // Redirect to home if not authenticated (no redirect needed, handled by Router)
   useEffect(() => {
@@ -31,19 +41,22 @@ function ChatContent() {
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/conversations", {
         title: "New Chat",
-        model: selectedModel,
+        model: state.selectedModel,
       });
       return response.json();
     },
     onSuccess: (conversation: Conversation) => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
-      setSelectedConversation(conversation.id);
+      setConversation(conversation.id);
       toast({
         title: "New chat created",
         description: "You can start chatting now.",
       });
     },
     onError: (error) => {
+      const errorMessage = error instanceof Error ? error.message : "Failed to create new chat";
+      setError(errorMessage);
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -57,35 +70,33 @@ function ChatContent() {
       }
       toast({
         title: "Error",
-        description: "Failed to create new chat.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
-  const handleNewChat = () => {
+  const handleNewChat = useCallback(() => {
     createConversationMutation.mutate();
-    setSidebarOpen(false);
-  };
+    setSidebar(false);
+  }, [createConversationMutation, setSidebar]);
 
-  const handleConversationSelect = (id: string) => {
-    setSelectedConversation(id);
-    setSidebarOpen(false);
-  };
+  const handleConversationSelect = useCallback((id: string) => {
+    setConversation(id);
+    setSidebar(false);
+  }, [setConversation, setSidebar]);
 
-  const handleSidebarToggle = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  const handleSidebarToggle = useCallback(() => {
+    setSidebar(!state.sidebarOpen);
+  }, [state.sidebarOpen, setSidebar]);
+
+  const handleModelChange = useCallback((model: string) => {
+    setModel(model);
+    updatePreferences({ selectedModel: model });
+  }, [setModel, updatePreferences]);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
-        </div>
-      </div>
-    );
+    return <ChatAreaSkeleton />;
   }
 
   if (!user) {
@@ -95,23 +106,25 @@ function ChatContent() {
   return (
     <div className="h-screen flex bg-white dark:bg-gray-950">
       <Sidebar
-        selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
-        selectedConversation={selectedConversation}
+        selectedModel={state.selectedModel}
+        onModelChange={handleModelChange}
+        selectedConversation={state.selectedConversation}
         onConversationSelect={handleConversationSelect}
         onNewChat={handleNewChat}
-        isOpen={sidebarOpen}
+        isOpen={state.sidebarOpen}
         onToggle={handleSidebarToggle}
+        data-testid="chat-sidebar"
       />
       
       <ChatArea
-        selectedConversation={selectedConversation}
-        selectedModel={selectedModel}
+        selectedConversation={state.selectedConversation}
+        selectedModel={state.selectedModel}
         onMenuToggle={handleSidebarToggle}
+        data-testid="chat-area"
       />
     </div>
   );
-}
+});
 
 export default function Chat() {
   return (
