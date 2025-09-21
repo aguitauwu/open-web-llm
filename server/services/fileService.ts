@@ -116,11 +116,15 @@ export class FileService {
   }
 
   generateFileName(originalName: string): string {
+    // Use high-resolution timestamp + strong randomness to prevent collisions
     const timestamp = Date.now();
-    const randomString = crypto.randomBytes(8).toString('hex');
+    const nanoTime = process.hrtime.bigint(); // High-resolution time
+    const randomString = crypto.randomBytes(16).toString('hex'); // Stronger randomness
     const ext = path.extname(originalName);
-    const baseName = path.basename(originalName, ext).replace(/[^a-zA-Z0-9]/g, '_');
-    return `${timestamp}_${randomString}_${baseName}${ext}`;
+    
+    // Remove original extension and create unique filename
+    const baseName = path.basename(originalName, ext).replace(/[^a-zA-Z0-9_-]/g, '_');
+    return `${timestamp}_${nanoTime.toString().slice(-8)}_${randomString}_${baseName}${ext}`;
   }
 
   async saveFile(file: UploadedFile, userId: string): Promise<FileUploadResult> {

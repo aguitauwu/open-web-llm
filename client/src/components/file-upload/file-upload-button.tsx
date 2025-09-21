@@ -74,20 +74,30 @@ export function FileUploadButton({
       
       if (isUnauthorizedError(error)) {
         toast({
-          title: 'Unauthorized',
-          description: 'You are logged out. Logging in again...',
+          title: 'Session expired',
+          description: 'Please log in again to continue uploading files',
           variant: 'destructive',
         });
         setTimeout(() => {
           window.location.href = '/api/login';
-        }, 500);
+        }, 2000);
         return;
       }
 
-      onUploadError?.(errorMessage);
+      // Provide more specific error messages
+      let userFriendlyMessage = errorMessage;
+      if (errorMessage.includes('size')) {
+        userFriendlyMessage = 'File is too large. Please choose a smaller file';
+      } else if (errorMessage.includes('type') || errorMessage.includes('format')) {
+        userFriendlyMessage = 'File type not supported. Please choose a different file format';
+      } else if (errorMessage.includes('network') || errorMessage.includes('connection')) {
+        userFriendlyMessage = 'Network error. Please check your connection and try again';
+      }
+
+      onUploadError?.(userFriendlyMessage);
       toast({
         title: 'Upload failed',
-        description: errorMessage,
+        description: userFriendlyMessage,
         variant: 'destructive',
       });
     },
