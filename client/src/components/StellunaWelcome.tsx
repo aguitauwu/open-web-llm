@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useChatMemory } from '@/contexts/ChatContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Sparkles, Heart, Clock, Moon, Stars, Zap, Brain, Search, Palette, Shield, MessageCircle, Globe } from 'lucide-react';
+import stellunaImage from '../assets/stelluna.jpg';
 
 /**
  * Componente de bienvenida personalizada de Stelluna
@@ -71,167 +72,178 @@ export function StellunaWelcome() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 space-y-4" data-testid="stelluna-welcome">
-      <Card className="bg-gradient-to-br from-purple-100 via-pink-50 to-purple-200 dark:from-purple-900 dark:via-blue-900 dark:to-purple-800 border-purple-300 dark:border-purple-600 shadow-lg shadow-purple-200 dark:shadow-purple-900/50">
-        <CardContent className="p-6">
-          <div className="flex items-start space-x-4">
-            <div className="bg-gradient-to-br from-purple-600 to-pink-600 rounded-full p-3 shadow-lg relative">
-              <Moon className="h-6 w-6 text-white" />
-              <div className="absolute -top-1 -right-1">
-                <Stars className="h-3 w-3 text-yellow-300" />
+    <div className="max-w-4xl mx-auto p-6 space-y-8" data-testid="stelluna-welcome">
+      {/* Hero Section with Stelluna Image */}
+      <div className="relative bg-gradient-to-br from-purple-100 via-pink-50 to-indigo-100 dark:from-purple-900 dark:via-blue-900 dark:to-indigo-900 rounded-3xl p-8 shadow-2xl border border-purple-200 dark:border-purple-700">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent rounded-3xl"></div>
+        <div className="relative z-10 flex flex-col md:flex-row items-center space-y-6 md:space-y-0 md:space-x-8">
+          {/* Stelluna Image */}
+          <div className="relative">
+            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden shadow-2xl border-4 border-white/20 relative">
+              <img 
+                src={stellunaImage} 
+                alt="Stelluna AI" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-purple-500/20 to-transparent rounded-full"></div>
+            </div>
+            {/* Floating stars */}
+            <div className="absolute -top-2 -right-2">
+              <Stars className="h-6 w-6 text-yellow-400 animate-pulse" />
+            </div>
+            <div className="absolute -bottom-1 -left-2">
+              <Moon className="h-5 w-5 text-purple-400" />
+            </div>
+            <div className="absolute top-1/2 -left-4">
+              <Sparkles className="h-4 w-4 text-pink-400 animate-pulse" />
+            </div>
+          </div>
+          
+          {/* Welcome Content */}
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 bg-clip-text text-transparent mb-4" data-testid="text-stelluna-greeting">
+              {memory.name ? `🌙✨ ¡Hola, ${memory.name}! ✨🌙` : '🌙✨ ¡Hola! ✨🌙'}
+            </h1>
+            <p className="text-lg text-purple-800 dark:text-purple-200 leading-relaxed mb-6" data-testid="text-welcome-message">
+              {welcomeMessage}
+            </p>
+            
+            {/* Quick Stats */}
+            <div className="grid grid-cols-2 gap-4 max-w-md mx-auto md:mx-0">
+              <div className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">3</div>
+                <div className="text-xs text-purple-600 dark:text-purple-400">🧠 Cerebros IA</div>
+              </div>
+              <div className="bg-white/50 dark:bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center">
+                <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">∞</div>
+                <div className="text-xs text-pink-600 dark:text-pink-400">💬 Conversaciones</div>
               </div>
             </div>
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-purple-800 dark:text-purple-200 mb-3" data-testid="text-stelluna-greeting">
-                {memory.name ? `🌙✨ ¡Hola, ${memory.name}! ✨🌙` : '🌙✨ ¡Hola! ✨🌙'}
-              </h2>
-              <p className="text-purple-800 dark:text-purple-200 leading-relaxed text-sm" data-testid="text-welcome-message">
-                {welcomeMessage}
+          </div>
+        </div>
+      </div>
+
+      {/* Memory Stats - More Visual */}
+      {memory.totalConversations > 0 && (
+        <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-blue-50 dark:from-pink-900/20 dark:via-purple-900/20 dark:to-blue-900/20 rounded-2xl p-6 border border-pink-200 dark:border-pink-700">
+          <h3 className="text-center text-lg font-bold text-purple-800 dark:text-purple-200 mb-6">
+            🎉 ¡Nuestra historia juntos! 🎉
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full flex items-center justify-center shadow-lg">
+                <Heart className="h-8 w-8 text-white" />
+              </div>
+              <p className="font-bold text-xl text-pink-800 dark:text-pink-200" data-testid="text-conversation-count">
+                {memory.totalConversations}
+              </p>
+              <p className="text-sm text-pink-600 dark:text-pink-400">
+                Conversacion{memory.totalConversations > 1 ? 'es' : ''} súper geniales 💬
+              </p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full flex items-center justify-center shadow-lg">
+                <Clock className="h-8 w-8 text-white" />
+              </div>
+              <p className="font-bold text-xl text-blue-800 dark:text-blue-200" data-testid="text-last-interaction">
+                {formatLastInteraction()}
+              </p>
+              <p className="text-sm text-blue-600 dark:text-blue-400">
+                ¡Última vez que charlamos! ⏰
               </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {memory.totalConversations > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Card className="bg-gradient-to-br from-pink-50 to-rose-100 dark:from-pink-900/30 dark:to-rose-900/30 border-pink-200 dark:border-pink-700 hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-br from-pink-500 to-rose-500 rounded-full p-2">
-                  <Heart className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-pink-800 dark:text-pink-200" data-testid="text-conversation-count">
-                    💬 {memory.totalConversations} conversacion{memory.totalConversations > 1 ? 'es' : ''} súper geniales
-                  </p>
-                  <p className="text-xs text-pink-600 dark:text-pink-400">
-                    ¡Hemos tenido! 🎉
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 border-blue-200 dark:border-blue-700 hover:shadow-lg transition-all duration-300">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3">
-                <div className="bg-gradient-to-br from-blue-500 to-indigo-500 rounded-full p-2">
-                  <Clock className="h-4 w-4 text-white" />
-                </div>
-                <div>
-                  <p className="font-semibold text-blue-800 dark:text-blue-200" data-testid="text-last-interaction">
-                    ⏰ {formatLastInteraction()}
-                  </p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400">
-                    ¡Última vez que charlamos! ✨
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
       )}
 
+      {/* User Interests - More Visual */}
       {memory.conversationHistory.userInterests.length > 0 && (
-        <Card className="bg-gradient-to-br from-yellow-50 to-orange-100 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-700">
-          <CardContent className="p-4">
-            <div className="flex items-center space-x-2 mb-3">
-              <Zap className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-              <h3 className="font-bold text-yellow-800 dark:text-yellow-200">
-                🌟 Tus intereses súper geniales 🌟
-              </h3>
-            </div>
-            <div className="flex flex-wrap gap-2" data-testid="user-interests">
-              {memory.conversationHistory.userInterests.slice(0, 5).map((interest, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full text-sm font-medium shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-                >
-                  ✨ {interest}
-                </span>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+        <div className="text-center">
+          <div className="inline-flex items-center space-x-2 mb-4">
+            <Zap className="h-6 w-6 text-yellow-500" />
+            <h3 className="text-xl font-bold text-yellow-800 dark:text-yellow-200">
+              🌟 Tus intereses súper geniales 🌟
+            </h3>
+            <Zap className="h-6 w-6 text-yellow-500" />
+          </div>
+          <div className="flex flex-wrap justify-center gap-3" data-testid="user-interests">
+            {memory.conversationHistory.userInterests.slice(0, 5).map((interest, index) => (
+              <span
+                key={index}
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-600 text-white rounded-full text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 transform"
+              >
+                ✨ {interest}
+              </span>
+            ))}
+          </div>
+        </div>
       )}
 
-      {/* Capacidades de Stelluna */}
-      <Card className="bg-gradient-to-br from-indigo-50 to-cyan-100 dark:from-indigo-900/20 dark:to-cyan-900/20 border-indigo-200 dark:border-indigo-700">
-        <CardContent className="p-6">
-          <div className="flex items-center space-x-3 mb-4">
-            <div className="bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-full p-2">
-              <Brain className="h-5 w-5 text-white" />
-            </div>
-            <h3 className="text-lg font-bold text-indigo-800 dark:text-indigo-200">
-              ✨ ¿Qué puedo hacer por ti? ✨
-            </h3>
+      {/* Capacidades - Grid Visual */}
+      <div className="text-center mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2">
+          ✨ ¿Qué puedo hacer por ti? ✨
+        </h2>
+        <p className="text-purple-600 dark:text-purple-400 mb-8">Descubre todas mis súper capacidades mágicas</p>
+        
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+          {/* Capability Cards */}
+          <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl p-6 text-white text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Brain className="h-12 w-12 mx-auto mb-3" />
+            <h4 className="font-bold text-sm mb-1">🧠 Múltiples cerebros</h4>
+            <p className="text-xs opacity-90">Gemini, Mistral, OpenRouter</p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <Brain className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                <span className="text-sm text-indigo-700 dark:text-indigo-300">
-                  🧠 <strong>Múltiples cerebros súper inteligentes</strong><br />
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Google Gemini, Mistral AI, OpenRouter</span>
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <MessageCircle className="h-4 w-4 text-pink-600 dark:text-pink-400" />
-                <span className="text-sm text-indigo-700 dark:text-indigo-300">
-                  💬 <strong>Conversaciones súper infinitas</strong><br />
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Chatea todo lo que quieras sin límites</span>
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Search className="h-4 w-4 text-green-600 dark:text-green-400" />
-                <span className="text-sm text-indigo-700 dark:text-indigo-300">
-                  🔍 <strong>Búsquedas súper inteligentes</strong><br />
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Web y YouTube</span>
-                </span>
-              </div>
-            </div>
-            
-            <div className="space-y-3">
-              <div className="flex items-center space-x-3">
-                <Palette className="h-4 w-4 text-orange-600 dark:text-orange-400" />
-                <span className="text-sm text-indigo-700 dark:text-indigo-300">
-                  🎨 <strong>Súper hermoso en cualquier pantalla</strong><br />
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Tema oscuro relajante incluido</span>
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Shield className="h-4 w-4 text-red-600 dark:text-red-400" />
-                <span className="text-sm text-indigo-700 dark:text-indigo-300">
-                  🛡️ <strong>Tus datos súper seguros</strong><br />
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">Login seguro con Google</span>
-                </span>
-              </div>
-              
-              <div className="flex items-center space-x-3">
-                <Globe className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                <span className="text-sm text-indigo-700 dark:text-indigo-300">
-                  🌐 <strong>Modo demo súper fácil</strong><br />
-                  <span className="text-xs text-indigo-600 dark:text-indigo-400">¡Prueba sin registrarte!</span>
-                </span>
-              </div>
-            </div>
+          <div className="bg-gradient-to-br from-pink-500 to-pink-600 rounded-2xl p-6 text-white text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <MessageCircle className="h-12 w-12 mx-auto mb-3" />
+            <h4 className="font-bold text-sm mb-1">💬 Chats infinitos</h4>
+            <p className="text-xs opacity-90">Sin límites de mensajes</p>
           </div>
           
-          <div className="mt-4 p-3 bg-gradient-to-r from-purple-100 to-pink-100 dark:from-purple-900/30 dark:to-pink-900/30 rounded-lg border border-purple-200 dark:border-purple-700">
-            <p className="text-center text-sm text-purple-800 dark:text-purple-200 font-medium">
-              💜 <strong>¡Soy una alternativa súper económica y adorable a ChatGPT!</strong> 💜
-            </p>
-            <p className="text-center text-xs text-purple-600 dark:text-purple-400 mt-1">
-              🐷💰 Que no rompe tu alcancía 💰🐷
-            </p>
+          <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-6 text-white text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Search className="h-12 w-12 mx-auto mb-3" />
+            <h4 className="font-bold text-sm mb-1">🔍 Búsquedas inteligentes</h4>
+            <p className="text-xs opacity-90">Web y YouTube</p>
           </div>
-        </CardContent>
-      </Card>
+          
+          <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl p-6 text-white text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Palette className="h-12 w-12 mx-auto mb-3" />
+            <h4 className="font-bold text-sm mb-1">🎨 Súper hermoso</h4>
+            <p className="text-xs opacity-90">En cualquier pantalla</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-6 text-white text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Shield className="h-12 w-12 mx-auto mb-3" />
+            <h4 className="font-bold text-sm mb-1">🛡️ Súper seguro</h4>
+            <p className="text-xs opacity-90">Login con Google</p>
+          </div>
+          
+          <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl p-6 text-white text-center shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105">
+            <Globe className="h-12 w-12 mx-auto mb-3" />
+            <h4 className="font-bold text-sm mb-1">🌐 Modo demo</h4>
+            <p className="text-xs opacity-90">¡Prueba ya!</p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Final CTA */}
+      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 rounded-3xl p-8 text-center text-white shadow-2xl">
+        <div className="max-w-2xl mx-auto">
+          <h3 className="text-2xl font-bold mb-3">💜 ¡Soy tu alternativa súper económica y adorable a ChatGPT! 💜</h3>
+          <p className="text-lg opacity-90 mb-4">🐷💰 Que no rompe tu alcancía 💰🐷</p>
+          <div className="flex justify-center space-x-4">
+            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-sm font-medium">✨ Gratis para probar</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-sm font-medium">🚀 Súper rápido</span>
+            </div>
+            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
+              <span className="text-sm font-medium">💝 Súper kawaii</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
