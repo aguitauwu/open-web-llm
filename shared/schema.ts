@@ -35,7 +35,12 @@ export const users = pgTable("users", {
   profileImageUrl: varchar("profile_image_url"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  // Índice para búsquedas por email (ya existe UNIQUE pero mejora performance)
+  index("idx_users_email").on(table.email),
+  // Índice para consultas por fecha de creación
+  index("idx_users_created").on(table.createdAt),
+]);
 
 // Chat conversations
 export const conversations = pgTable("conversations", {
@@ -45,7 +50,11 @@ export const conversations = pgTable("conversations", {
   model: varchar("model").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
-});
+}, (table) => [
+  // Índice para consultas frecuentes de conversaciones por usuario ordenadas por fecha
+  index("idx_conversations_user_updated").on(table.userId, table.updatedAt),
+  index("idx_conversations_user_created").on(table.userId, table.createdAt),
+]);
 
 // Chat messages
 export const messages = pgTable("messages", {
@@ -55,7 +64,12 @@ export const messages = pgTable("messages", {
   content: text("content").notNull(),
   metadata: jsonb("metadata"), // For storing search results, model info, etc.
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  // Índice para consultas frecuentes de mensajes por conversación ordenados por fecha
+  index("idx_messages_conversation_created").on(table.conversationId, table.createdAt),
+  // Índice para buscar mensajes por rol
+  index("idx_messages_role_created").on(table.role, table.createdAt),
+]);
 
 // Search results cache
 export const searchResults = pgTable("search_results", {
@@ -64,7 +78,12 @@ export const searchResults = pgTable("search_results", {
   type: varchar("type").notNull(), // 'web' or 'youtube'
   results: jsonb("results").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
-});
+}, (table) => [
+  // Índice único para cache de búsquedas (evita duplicados)
+  index("idx_search_query_type").on(table.query, table.type),
+  // Índice para limpiar cache antiguo por fecha
+  index("idx_search_created").on(table.createdAt),
+]);
 
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({

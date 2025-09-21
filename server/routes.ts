@@ -389,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/conversations/:id/messages', aiLimiter, optionalAuth, validateCreateMessage, async (req: any, res) => {
+  app.post('/api/conversations/:id/messages', aiLimiter, optionalAuth, validateCreateMessage, async (req: any, res: any) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const conversationId = req.params.id;
