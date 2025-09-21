@@ -86,12 +86,12 @@ export class FileService {
   }
 
   private getMimeTypeExtensions(mimeType: string): string[] {
+    // Secure file types only - no HTML/SVG/XML to prevent XSS
     const extensionMap: Record<string, string[]> = {
       'image/jpeg': ['.jpg', '.jpeg'],
       'image/png': ['.png'],
       'image/gif': ['.gif'],
       'image/webp': ['.webp'],
-      'image/svg+xml': ['.svg'],
       'application/pdf': ['.pdf'],
       'text/plain': ['.txt'],
       'text/markdown': ['.md'],
@@ -101,12 +101,7 @@ export class FileService {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/vnd.ms-powerpoint': ['.ppt'],
       'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
-      'text/javascript': ['.js'],
-      'text/css': ['.css'],
-      'text/html': ['.html', '.htm'],
       'application/json': ['.json'],
-      'text/xml': ['.xml'],
-      'application/xml': ['.xml'],
       'application/zip': ['.zip'],
       'application/x-rar-compressed': ['.rar'],
       'application/x-7z-compressed': ['.7z'],

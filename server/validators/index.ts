@@ -1,6 +1,7 @@
 import { body, query, param, validationResult } from 'express-validator';
 import type { Request, Response, NextFunction } from 'express';
 import { config } from '../config/index.js';
+import { AppLogger } from '../utils/logger.js';
 
 // Middleware para manejar errores de validación
 export function handleValidationErrors(req: Request, res: Response, next: NextFunction) {
@@ -13,7 +14,7 @@ export function handleValidationErrors(req: Request, res: Response, next: NextFu
       return `${field}: ${message}`;
     }).join(', ');
     
-    console.warn(`⚠️  Validation failed for ${req.method} ${req.path}:`, errorMessages);
+    AppLogger.warn(`Validation failed for ${req.method} ${req.path}`, { errors: errorMessages });
     
     return res.status(400).json({
       error: 'Validation failed',

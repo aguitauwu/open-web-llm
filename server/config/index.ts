@@ -78,9 +78,11 @@ export function validateConfig() {
   const errors: string[] = [];
   const warnings: string[] = [];
   
-  // Validación crítica (causará fallo de inicialización)
-  if (!config.auth.sessionSecret) {
-    errors.push('SESSION_SECRET is required for secure session management');
+  // Validación crítica (causará fallo de inicialización solo si auth está habilitada)
+  const isAuthEnabled = config.auth.google.clientId && config.auth.google.clientSecret;
+  
+  if (isAuthEnabled && !config.auth.sessionSecret) {
+    errors.push('SESSION_SECRET is required when authentication is enabled');
   }
   
   if (config.auth.sessionSecret && config.auth.sessionSecret.length < 32) {
