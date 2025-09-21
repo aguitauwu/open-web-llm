@@ -5,13 +5,49 @@ import { setupGoogleAuth, isAuthenticated, optionalAuth } from "./googleAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
 import { queryAI } from "./gemini";
+import { aiLimiter, searchLimiter } from "./middleware/security.js";
+import { 
+  validateCreateConversation, 
+  validateUpdateConversation,
+  validateCreateMessage,
+  validateSearch,
+  validateUUIDParam,
+  validateAIPrompt,
+  sanitizePrompt
+} from "./validators/index.js";
+import { AppLogger } from "./utils/logger.js";
 
 // AI integration with fallback for all providers
-async function queryAIWithFallback(model: string, prompt: string) {
+async function queryAIWithFallback(model: string, prompt: string, userId?: string) {
+  const startTime = Date.now();
   try {
-    return await queryAI(model, prompt);
+    // Sanitize prompt before sending to AI
+    const sanitizedPrompt = sanitizePrompt(prompt);
+    const response = await queryAI(model, sanitizedPrompt);
+    
+    const duration = Date.now() - startTime;
+    AppLogger.ai({
+      type: 'ai_response',
+      model,
+      userId,
+      promptLength: sanitizedPrompt.length,
+      responseLength: response.length,
+      duration
+    });
+    
+    return response;
   } catch (error) {
-    console.error("AI API error:", error);
+    const duration = Date.now() - startTime;
+    AppLogger.ai({
+      type: 'ai_error',
+      model,
+      userId,
+      promptLength: prompt.length,
+      duration,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
+    
+    AppLogger.error("AI API error", error);
     return generateFallbackResponse(prompt);
   }
 }
@@ -29,84 +65,156 @@ function generateFallbackResponse(prompt: string): string {
   return responses[Math.floor(Math.random() * responses.length)];
 }
 
-// Google Custom Search API integration
-async function searchWeb(query: string) {
+// Google Custom Search API integration with enhanced logging
+async function searchWeb(query: string, userId?: string) {
+  const startTime = Date.now();
   const API_KEY = process.env.GOOGLE_API_KEY;
   const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
   
   if (!API_KEY || !SEARCH_ENGINE_ID) {
-    throw new Error("Google API credentials not found");
+    AppLogger.error("Google API credentials not configured");
+    throw new Error("Search service temporarily unavailable");
   }
 
-  const response = await fetch(
-    `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=5`
-  );
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&num=5`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Google Search API error: ${response.statusText}`);
+    if (!response.ok) {
+      AppLogger.error(`Google Search API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Search service error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const results = data.items?.map((item: any) => ({
+      title: item.title,
+      link: item.link,
+      snippet: item.snippet,
+    })) || [];
+    
+    const duration = Date.now() - startTime;
+    AppLogger.performance({
+      type: 'api_request',
+      duration,
+      endpoint: 'google_search',
+      details: { query, resultsCount: results.length, userId }
+    });
+    
+    return results;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    AppLogger.performance({
+      type: 'api_request',
+      duration,
+      endpoint: 'google_search',
+      details: { query, error: true, userId }
+    });
+    throw error;
   }
-
-  const data = await response.json();
-  return data.items?.map((item: any) => ({
-    title: item.title,
-    link: item.link,
-    snippet: item.snippet,
-  })) || [];
 }
 
-// YouTube Data API integration
-async function searchYouTube(query: string) {
+// YouTube Data API integration with enhanced logging
+async function searchYouTube(query: string, userId?: string) {
+  const startTime = Date.now();
   const API_KEY = process.env.YOUTUBE_API_KEY || process.env.GOOGLE_API_KEY;
   
   if (!API_KEY) {
-    throw new Error("YouTube API key not found");
+    AppLogger.error("YouTube API key not configured");
+    throw new Error("Video search service temporarily unavailable");
   }
 
-  const response = await fetch(
-    `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=5&key=${API_KEY}`
-  );
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=5&key=${API_KEY}`
+    );
 
-  if (!response.ok) {
-    throw new Error(`YouTube API error: ${response.statusText}`);
+    if (!response.ok) {
+      AppLogger.error(`YouTube API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Video search error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const results = data.items?.map((item: any) => ({
+      id: item.id.videoId,
+      title: item.snippet.title,
+      description: item.snippet.description,
+      thumbnail: item.snippet.thumbnails.medium.url,
+      url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
+    })) || [];
+    
+    const duration = Date.now() - startTime;
+    AppLogger.performance({
+      type: 'api_request',
+      duration,
+      endpoint: 'youtube_search',
+      details: { query, resultsCount: results.length, userId }
+    });
+    
+    return results;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    AppLogger.performance({
+      type: 'api_request',
+      duration,
+      endpoint: 'youtube_search',
+      details: { query, error: true, userId }
+    });
+    throw error;
   }
-
-  const data = await response.json();
-  return data.items?.map((item: any) => ({
-    id: item.id.videoId,
-    title: item.snippet.title,
-    description: item.snippet.description,
-    thumbnail: item.snippet.thumbnails.medium.url,
-    url: `https://www.youtube.com/watch?v=${item.id.videoId}`,
-  })) || [];
 }
 
-// Google Custom Search API for Images
-async function searchImages(query: string) {
+// Google Custom Search API for Images with enhanced logging
+async function searchImages(query: string, userId?: string) {
+  const startTime = Date.now();
   const API_KEY = process.env.GOOGLE_API_KEY;
   const SEARCH_ENGINE_ID = process.env.GOOGLE_SEARCH_ENGINE_ID;
   
   if (!API_KEY || !SEARCH_ENGINE_ID) {
-    throw new Error("Google API credentials not found");
+    AppLogger.error("Google Image Search API credentials not configured");
+    throw new Error("Image search service temporarily unavailable");
   }
 
-  const response = await fetch(
-    `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&searchType=image&num=10&imgSize=large`
-  );
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/customsearch/v1?key=${API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodeURIComponent(query)}&searchType=image&num=10&imgSize=large`
+    );
 
-  if (!response.ok) {
-    throw new Error(`Google Image Search API error: ${response.statusText}`);
+    if (!response.ok) {
+      AppLogger.error(`Google Image Search API error: ${response.status} ${response.statusText}`);
+      throw new Error(`Image search error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const results = data.items?.map((item: any) => ({
+      title: item.title,
+      link: item.link,
+      thumbnail: item.image?.thumbnailLink || item.link,
+      contextLink: item.image?.contextLink,
+      displayLink: item.displayLink,
+      width: item.image?.width,
+      height: item.image?.height,
+    })) || [];
+    
+    const duration = Date.now() - startTime;
+    AppLogger.performance({
+      type: 'api_request',
+      duration,
+      endpoint: 'image_search',
+      details: { query, resultsCount: results.length, userId }
+    });
+    
+    return results;
+  } catch (error) {
+    const duration = Date.now() - startTime;
+    AppLogger.performance({
+      type: 'api_request',
+      duration,
+      endpoint: 'image_search',
+      details: { query, error: true, userId }
+    });
+    throw error;
   }
-
-  const data = await response.json();
-  return data.items?.map((item: any) => ({
-    title: item.title,
-    link: item.link,
-    thumbnail: item.image?.thumbnailLink || item.link,
-    contextLink: item.image?.contextLink,
-    displayLink: item.displayLink,
-    width: item.image?.width,
-    height: item.image?.height,
-  })) || [];
 }
 
 // Temporary storage for demo messages
@@ -145,7 +253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Conversation routes (now with optional auth)
-  app.get('/api/conversations', optionalAuth, async (req: any, res) => {
+  app.get('/api/conversations', optionalAuth, async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
         // Return demo conversations for non-authenticated users
@@ -161,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/conversations', optionalAuth, async (req: any, res) => {
+  app.post('/api/conversations', optionalAuth, validateCreateConversation, async (req: any, res: any) => {
     try {
       const validatedData = insertConversationSchema.parse(req.body);
       
@@ -191,7 +299,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/conversations/:id', optionalAuth, async (req: any, res) => {
+  app.get('/api/conversations/:id', optionalAuth, validateUUIDParam('id'), async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
         // Return demo conversation
@@ -221,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch('/api/conversations/:id', optionalAuth, async (req: any, res) => {
+  app.patch('/api/conversations/:id', optionalAuth, validateUpdateConversation, async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
         // Demo mode - just return success
@@ -244,7 +352,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/conversations/:id', optionalAuth, async (req: any, res) => {
+  app.delete('/api/conversations/:id', optionalAuth, validateUUIDParam('id'), async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
         // Demo mode - just return success
@@ -281,7 +389,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/conversations/:id/messages', optionalAuth, async (req: any, res) => {
+  app.post('/api/conversations/:id/messages', aiLimiter, optionalAuth, validateCreateMessage, async (req: any, res) => {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const conversationId = req.params.id;
