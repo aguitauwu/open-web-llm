@@ -57,7 +57,6 @@ export const config = {
   // Deployment configuration
   deployment: {
     vercelUrl: process.env.VERCEL_URL,
-    replitUrl: process.env.REPLIT_URL,
     isDevelopment: process.env.NODE_ENV === 'development',
     isProduction: process.env.NODE_ENV === 'production',
   },

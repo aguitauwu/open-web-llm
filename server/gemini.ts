@@ -58,7 +58,7 @@ async function queryOpenRouterAPI(model: string, prompt: string): Promise<string
             headers: {
                 "Authorization": `Bearer ${API_KEY}`,
                 "Content-Type": "application/json",
-                "HTTP-Referer": process.env.REPLIT_URL || "https://localhost:5000",
+                "HTTP-Referer": process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://localhost:5000",
                 "X-Title": "AI Chat Assistant",
             },
             body: JSON.stringify({
