@@ -227,19 +227,19 @@ export function StellunaWelcome() {
       </div>
       
       {/* Final CTA */}
-      <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-purple-700 rounded-3xl p-8 text-center text-white shadow-2xl">
+      <div className="bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 dark:from-purple-900/30 dark:via-pink-900/30 dark:to-indigo-900/30 rounded-3xl p-8 text-center border border-purple-200 dark:border-purple-700 shadow-lg">
         <div className="max-w-2xl mx-auto">
-          <h3 className="text-2xl font-bold mb-3">💜 ¡Soy tu alternativa súper económica y adorable a ChatGPT! 💜</h3>
-          <p className="text-lg opacity-90 mb-4">🐷💰 Que no rompe tu alcancía 💰🐷</p>
+          <h3 className="text-2xl font-bold mb-3 text-purple-800 dark:text-purple-200">💜 ¡Soy tu alternativa súper económica y adorable a ChatGPT! 💜</h3>
+          <p className="text-lg mb-4 text-purple-700 dark:text-purple-300">🐷💰 Que no rompe tu alcancía 💰🐷</p>
           <div className="flex justify-center space-x-4">
-            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-              <span className="text-sm font-medium">✨ Gratis para probar</span>
+            <div className="bg-white/70 dark:bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-300 dark:border-purple-600">
+              <span className="text-sm font-medium text-purple-800 dark:text-purple-200">✨ Gratis para probar</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-              <span className="text-sm font-medium">🚀 Súper rápido</span>
+            <div className="bg-white/70 dark:bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-300 dark:border-purple-600">
+              <span className="text-sm font-medium text-purple-800 dark:text-purple-200">🚀 Súper rápido</span>
             </div>
-            <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2">
-              <span className="text-sm font-medium">💝 Súper kawaii</span>
+            <div className="bg-white/70 dark:bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 border border-purple-300 dark:border-purple-600">
+              <span className="text-sm font-medium text-purple-800 dark:text-purple-200">💝 Súper kawaii</span>
             </div>
           </div>
         </div>
