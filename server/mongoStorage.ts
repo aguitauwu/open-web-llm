@@ -13,6 +13,7 @@ import {
   type MessageAttachment,
 } from "@shared/schema";
 import { IStorage } from "./storage";
+import { AppLogger } from './utils/logger.js';
 
 export class MongoStorage implements IStorage {
   private client: MongoClient;
@@ -38,9 +39,9 @@ export class MongoStorage implements IStorage {
   async connect() {
     try {
       await this.client.connect();
-      console.log('✅ Connected to MongoDB successfully');
+      AppLogger.info('Connected to MongoDB successfully');
     } catch (error) {
-      console.error('❌ Failed to connect to MongoDB:', error);
+      AppLogger.error('Failed to connect to MongoDB', error);
       throw new Error(`MongoDB connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
@@ -48,9 +49,9 @@ export class MongoStorage implements IStorage {
   async disconnect() {
     try {
       await this.client.close();
-      console.log('📴 Disconnected from MongoDB');
+      AppLogger.info('Disconnected from MongoDB');
     } catch (error) {
-      console.error('⚠️  Error during MongoDB disconnection:', error);
+      AppLogger.warn('Error during MongoDB disconnection', { error });
     }
   }
 

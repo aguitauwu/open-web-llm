@@ -6,13 +6,19 @@ import { config } from '../config/index.js';
 export function handleValidationErrors(req: Request, res: Response, next: NextFunction) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorMessages = errors.array().map(error => `${error.param}: ${error.msg}`).join(', ');
+    const errorArray = errors.array();
+    const errorMessages = errorArray.map(error => {
+      const field = 'path' in error ? error.path : 'field';
+      const message = error.msg;
+      return `${field}: ${message}`;
+    }).join(', ');
+    
     console.warn(`⚠️  Validation failed for ${req.method} ${req.path}:`, errorMessages);
     
     return res.status(400).json({
       error: 'Validation failed',
       message: 'The request contains invalid data. Please check your input and try again.',
-      details: config.deployment.isDevelopment ? errors.array() : undefined
+      details: config.deployment.isDevelopment ? errorArray : undefined
     });
   }
   next();

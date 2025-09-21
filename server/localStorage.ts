@@ -12,6 +12,7 @@ import {
   type MessageAttachment,
 } from "@shared/schema";
 import { IStorage } from "./storage";
+import { AppLogger } from './utils/logger.js';
 
 export class LocalStorage implements IStorage {
   private users: Map<string, User> = new Map();
@@ -221,7 +222,7 @@ export class LocalStorage implements IStorage {
           this.messageAttachments = new Map(JSON.parse(messageAttachments));
         }
       } catch (error) {
-        console.warn('⚠️  Failed to load data from localStorage. Starting with empty storage:', error instanceof Error ? error.message : 'Unknown error');
+        AppLogger.warn('Failed to load data from localStorage. Starting with empty storage', { error: error instanceof Error ? error.message : 'Unknown error' });
       }
     }
   }

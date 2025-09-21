@@ -4,9 +4,13 @@ import session from "express-session";
 import MongoStore from "connect-mongo";
 import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
+import { AppLogger } from './utils/logger.js';
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  console.warn("⚠️  Google OAuth credentials not provided. Users won't be able to authenticate with Google. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.");
+  AppLogger.warn("Google OAuth credentials not provided. Users won't be able to authenticate with Google", { 
+    missing: ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'],
+    suggestion: 'Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables'
+  });
 }
 
 export function getSession() {

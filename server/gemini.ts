@@ -1,4 +1,5 @@
 import { GoogleGenAI } from "@google/genai";
+import { AppLogger } from './utils/logger.js';
 
 // DON'T DELETE THIS COMMENT
 // Follow these instructions when using this blueprint:
@@ -7,7 +8,10 @@ import { GoogleGenAI } from "@google/genai";
 
 // This API key is from Gemini Developer API Key, not vertex AI API Key
 if (!process.env.GEMINI_API_KEY) {
-  console.warn("⚠️  Gemini API key not provided. Gemini AI models will not be available. Get your API key from https://aistudio.google.com/app/apikey and set GEMINI_API_KEY environment variable.");
+  AppLogger.warn("Gemini API key not provided. Gemini AI models will not be available", { 
+    missing: 'GEMINI_API_KEY',
+    suggestion: 'Get your API key from https://aistudio.google.com/app/apikey and set GEMINI_API_KEY environment variable'
+  });
 }
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
@@ -41,7 +45,7 @@ async function queryMistralAPI(model: string, prompt: string): Promise<string> {
         return data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error("❌ Mistral API error:", errorMessage);
+        AppLogger.error("Mistral API error", error);
         throw new Error(`Mistral API request failed: ${errorMessage}`);
     }
 }
@@ -78,7 +82,7 @@ async function queryOpenRouterAPI(model: string, prompt: string): Promise<string
         return data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
     } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        console.error("❌ OpenRouter API error:", errorMessage);
+        AppLogger.error("OpenRouter API error", error);
         throw new Error(`OpenRouter API request failed: ${errorMessage}`);
     }
 }
