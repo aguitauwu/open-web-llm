@@ -182,19 +182,19 @@ export function Message({ message, onRegenerate }: MessageProps) {
   const metadata = message.metadata as any;
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "items-start space-x-3"}`}>
+    <div className={`flex ${isUser ? "justify-end" : "items-start space-x-3"} group`}>
       {!isUser && (
-        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+        <div className="w-7 h-7 rounded-full overflow-hidden flex-shrink-0">
           <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
         </div>
       )}
       
       <div className={`flex-1 max-w-3xl ${isUser ? "" : "ml-0"}`}>
         <div
-          className={`rounded-2xl px-4 py-3 shadow-sm hover:shadow-md transition-shadow ${
+          className={`rounded-lg px-4 py-3 ${
             isUser
-              ? "bg-gradient-to-r from-blue-600 to-blue-500 text-white rounded-br-md"
-              : "bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-tl-md"
+              ? "bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900"
+              : "bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
           }`}
         >
           <div className="whitespace-pre-wrap">{message.content}</div>
@@ -265,27 +265,28 @@ export function Message({ message, onRegenerate }: MessageProps) {
           )}
         </div>
         
-        <div className={`flex items-center mt-2 text-xs text-gray-600 dark:text-gray-400 ${
+        <div className={`flex items-center mt-3 text-xs ${isUser ? "text-gray-400 dark:text-gray-500" : "text-gray-500 dark:text-gray-400"} ${
           isUser ? "justify-end" : "justify-between"
         }`}>
-          <div className={`flex items-center space-x-4 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
+          <div className={`flex items-center space-x-3 ${isUser ? "flex-row-reverse space-x-reverse" : ""}`}>
             <span>{formatTime(new Date(message.createdAt || Date.now()))}</span>
             {!isUser && metadata?.model && (
               <span className="flex items-center space-x-1">
-                <Bot className="h-3 w-3 text-purple-500" />
+                <Bot className="h-3 w-3 text-gray-400" />
                 <span>{metadata.model}</span>
               </span>
             )}
           </div>
           
           {!isUser && (
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-1 opacity-0 md:group-hover:opacity-100 md:opacity-0 opacity-100 transition-opacity">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:ring-1 focus-visible:ring-gray-300"
                 onClick={handleCopy}
                 title="Copy message"
+                data-testid="button-copy-message"
               >
                 <Copy className="h-3 w-3" />
               </Button>
@@ -293,9 +294,10 @@ export function Message({ message, onRegenerate }: MessageProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-6 w-6"
+                  className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:ring-1 focus-visible:ring-gray-300"
                   onClick={onRegenerate}
                   title="Regenerate"
+                  data-testid="button-regenerate-message"
                 >
                   <RotateCcw className="h-3 w-3" />
                 </Button>
@@ -303,9 +305,10 @@ export function Message({ message, onRegenerate }: MessageProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6"
+                className="h-6 w-6 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus-visible:ring-1 focus-visible:ring-gray-300"
                 onClick={handleShare}
                 title="Share"
+                data-testid="button-share-message"
               >
                 <Share className="h-3 w-3" />
               </Button>

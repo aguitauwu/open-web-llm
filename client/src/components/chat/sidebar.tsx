@@ -122,19 +122,20 @@ export function Sidebar({
       
       {/* Sidebar */}
       <div
-        className={`fixed lg:relative inset-y-0 left-0 z-50 w-80 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200/50 dark:border-gray-800/50 flex flex-col transition-all duration-300 lg:translate-x-0 shadow-xl lg:shadow-none ${
+        className={`fixed lg:relative inset-y-0 left-0 z-50 w-80 bg-white dark:bg-gray-950 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-all duration-300 lg:translate-x-0 shadow-lg lg:shadow-none ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Header */}
-        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-semibold">Stelluna</h1>
-            <div className="flex items-center space-x-2">
+        <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-xl font-light text-gray-900 dark:text-gray-100">Stelluna</h1>
+            <div className="flex items-center space-x-1">
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               >
                 {theme === "dark" ? (
                   <Sun className="h-4 w-4" />
@@ -145,7 +146,7 @@ export function Sidebar({
               <Button
                 variant="ghost"
                 size="icon"
-                className="lg:hidden"
+                className="lg:hidden h-8 w-8 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
                 onClick={onToggle}
               >
                 <Menu className="h-4 w-4" />
@@ -153,21 +154,27 @@ export function Sidebar({
             </div>
           </div>
           
-          <Button onClick={onNewChat} className="w-full">
+          <Button 
+            onClick={onNewChat} 
+            className="w-full bg-gray-100 hover:bg-gray-200 dark:bg-gray-800 dark:hover:bg-gray-700 text-gray-900 dark:text-gray-100 border-0 shadow-none font-normal"
+            variant="outline"
+          >
             <Plus className="h-4 w-4 mr-2" />
             New Chat
           </Button>
         </div>
 
         {/* Model Selection */}
-        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
-          <label className="block text-sm font-medium mb-2">AI Model</label>
+        <div className="px-6 py-4">
+          <div className="mb-3">
+            <label className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Model</label>
+          </div>
           <Select value={selectedModel} onValueChange={onModelChange}>
-            <SelectTrigger>
+            <SelectTrigger className="border-gray-200 dark:border-gray-700 focus:ring-1 focus:ring-gray-300 dark:focus:ring-gray-600">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <div className="px-2 py-1 text-xs font-semibold text-gray-500 dark:text-gray-400">
+              <div className="px-2 py-1 text-xs font-medium text-gray-400 dark:text-gray-500">
                 Google Gemini
               </div>
               <SelectItem value="Gemini 2.5 Flash">Gemini 2.5 Flash</SelectItem>
@@ -176,7 +183,7 @@ export function Sidebar({
               <SelectItem value="Gemini 1.5 Pro">Gemini 1.5 Pro</SelectItem>
               <SelectItem value="Gemini 1.0 Pro">Gemini 1.0 Pro</SelectItem>
               
-              <div className="px-2 py-1 mt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+              <div className="px-2 py-1 mt-2 text-xs font-medium text-gray-400 dark:text-gray-500">
                 Mistral AI
               </div>
               <SelectItem value="Mistral Large">Mistral Large</SelectItem>
@@ -184,7 +191,7 @@ export function Sidebar({
               <SelectItem value="Mixtral 8x7B">Mixtral 8x7B</SelectItem>
               <SelectItem value="Mixtral 8x22B">Mixtral 8x22B</SelectItem>
               
-              <div className="px-2 py-1 mt-2 text-xs font-semibold text-gray-500 dark:text-gray-400">
+              <div className="px-2 py-1 mt-2 text-xs font-medium text-gray-400 dark:text-gray-500">
                 OpenRouter
               </div>
               <SelectItem value="OpenRouter GPT-4o">GPT-4o</SelectItem>
@@ -194,66 +201,72 @@ export function Sidebar({
               <SelectItem value="OpenRouter DeepSeek V3">DeepSeek V3</SelectItem>
             </SelectContent>
           </Select>
-          <div className="mt-2 flex items-center space-x-2 text-xs text-gray-600 dark:text-gray-400">
-            <div className="w-2 h-2 bg-green-500 rounded-full" />
-            <span>Model ready</span>
+          <div className="mt-3 flex items-center space-x-2">
+            <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+            <span className="text-xs text-gray-500 dark:text-gray-400">Model ready</span>
           </div>
         </div>
 
         {/* Search Features */}
-        <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
-          <h3 className="text-sm font-medium mb-3">Search Features</h3>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-3 text-sm p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-              <Search className="h-4 w-4 text-blue-500" />
-              <span>Web Search</span>
-              <span className="ml-auto text-xs bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded">
-                Google
-              </span>
+        <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
+          <div className="mb-3">
+            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Capabilities</h3>
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center space-x-3 text-sm">
+              <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <Search className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-gray-900 dark:text-gray-100">Web Search</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Google integration</div>
+              </div>
             </div>
-            <div className="flex items-center space-x-3 text-sm p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-              <Youtube className="h-4 w-4 text-red-500" />
-              <span>YouTube Search</span>
-              <span className="ml-auto text-xs bg-red-100 dark:bg-red-900 text-red-700 dark:text-red-300 px-2 py-0.5 rounded">
-                API
-              </span>
+            <div className="flex items-center space-x-3 text-sm">
+              <div className="w-6 h-6 rounded bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                <Youtube className="h-3 w-3 text-gray-600 dark:text-gray-400" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm text-gray-900 dark:text-gray-100">YouTube Search</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">Video content search</div>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Chat History */}
         <div className="flex-1 overflow-hidden">
-          <div className="p-4 border-b border-gray-200/50 dark:border-gray-800/50">
-            <h3 className="text-sm font-medium">Chat History</h3>
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
+            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Recent Chats</h3>
           </div>
-          <ScrollArea className="flex-1 px-4">
-            <div className="space-y-2 py-2">
+          <ScrollArea className="flex-1 px-3">
+            <div className="space-y-1 py-2">
               {conversations.map((conversation) => (
                 <div
                   key={conversation.id}
-                  className={`p-3 rounded-lg cursor-pointer transition-colors group ${
+                  className={`mx-3 px-3 py-2 rounded-lg cursor-pointer transition-all duration-200 group ${
                     selectedConversation === conversation.id
-                      ? "bg-gray-200 dark:bg-gray-700"
-                      : "hover:bg-gray-100 dark:hover:bg-gray-800"
+                      ? "bg-gray-100 dark:bg-gray-800"
+                      : "hover:bg-gray-50 dark:hover:bg-gray-900"
                   }`}
                   onClick={() => onConversationSelect(conversation.id)}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                      <p className="text-sm text-gray-900 dark:text-gray-100 truncate leading-5">
                         {conversation.title}
                       </p>
-                      <p className="text-xs text-gray-600 dark:text-gray-400 mt-0.5">
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {formatRelativeTime(new Date(conversation.updatedAt!))}
                       </p>
                     </div>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="opacity-0 group-hover:opacity-100 h-6 w-6"
+                      className="opacity-0 group-hover:opacity-100 h-7 w-7 hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={(e) => handleDeleteConversation(e, conversation.id)}
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-3.5 w-3.5 text-gray-400" />
                     </Button>
                   </div>
                 </div>
@@ -264,19 +277,19 @@ export function Sidebar({
 
         {/* User Profile */}
         {user && (
-          <div className="p-4 border-t border-gray-200/50 dark:border-gray-800/50 bg-gray-50/50 dark:bg-gray-800/50">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-8 w-8">
+          <div className="p-4 border-t border-gray-200 dark:border-gray-800">
+            <div className="flex items-center space-x-3 px-2">
+              <Avatar className="h-7 w-7">
                 <AvatarImage src={(user as any)?.profileImageUrl || ""} alt={`${(user as any)?.firstName || ''} ${(user as any)?.lastName || ''}`} />
-                <AvatarFallback>
+                <AvatarFallback className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-xs">
                   {(user as any)?.firstName?.[0] || ''}{(user as any)?.lastName?.[0] || ''}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">
+                <p className="text-sm text-gray-900 dark:text-gray-100 truncate">
                   {(user as any)?.firstName || ''} {(user as any)?.lastName || ''}
                 </p>
-                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
                   {(user as any)?.email || ''}
                 </p>
               </div>
@@ -284,9 +297,9 @@ export function Sidebar({
                 variant="ghost"
                 size="icon"
                 onClick={() => (window.location.href = "/api/logout")}
-                className="h-8 w-8"
+                className="h-7 w-7 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
