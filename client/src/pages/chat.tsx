@@ -2,7 +2,7 @@ import { useEffect, useCallback, memo } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useChat, useChatActions } from "@/contexts/ChatContext";
+import { useChat, useChatActions, useChatMemory } from "@/contexts/ChatContext";
 import { useUserPreferences } from "@/hooks/useLocalStorage";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
@@ -19,6 +19,7 @@ const ChatContent = memo(function ChatContent() {
   const { state } = useChat();
   const { setModel, setConversation, setSidebar, setError } = useChatActions();
   const { preferences, updatePreferences } = useUserPreferences();
+  const { incrementConversations } = useChatMemory();
 
   // Sincronizar preferencias del usuario con el estado global
   useEffect(() => {
@@ -48,9 +49,10 @@ const ChatContent = memo(function ChatContent() {
     onSuccess: (conversation: Conversation) => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
       setConversation(conversation.id);
+      incrementConversations(); // Incrementar contador de conversaciones
       toast({
-        title: "New chat created",
-        description: "You can start chatting now.",
+        title: "Nueva conversación creada",
+        description: "¡Puedes empezar a chatear con Stelluna ahora!",
       });
     },
     onError: (error) => {

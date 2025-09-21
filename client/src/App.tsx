@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { ChatProvider } from "@/contexts/ChatContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { MessageSkeleton } from "@/components/ui/skeleton";
+import { ThemeAutoDetectBanner } from "@/components/ThemeAutoDetectBanner";
 import Landing from "@/pages/landing";
 import Chat from "@/pages/chat";
 import NotFound from "@/pages/not-found";
@@ -31,6 +32,7 @@ function Router() {
 
   return (
     <ChatProvider>
+      <ThemeAutoDetectBanner />
       <Switch>
         {!user ? (
           <Route path="/" component={Landing} />

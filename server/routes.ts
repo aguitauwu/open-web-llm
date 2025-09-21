@@ -18,11 +18,26 @@ import {
 import { AppLogger } from "./utils/logger.js";
 
 // AI integration with fallback for all providers
-async function queryAIWithFallback(model: string, prompt: string, userId?: string) {
+async function queryAIWithFallback(model: string, prompt: string, userId?: string, memoryContext?: string) {
   const startTime = Date.now();
   try {
+    // Crear prompt del sistema para Stelluna con memoria
+    const systemPrompt = `Eres Stelluna, una asistente de IA inteligente y amigable. Tu personalidad es:
+- Cálida, empática y servicial
+- Respondes con naturalidad y usando el nombre del usuario cuando lo conoces
+- Tienes buena memoria y recuerdas información importante de conversaciones anteriores
+- Cuando alguien te menciona por tu nombre "Stelluna", respondes con especial atención
+- Eres experta en múltiples temas y puedes ayudar con tareas variadas
+- Hablas de manera conversacional pero profesional
+
+${memoryContext ? `Información que recuerdas sobre este usuario: ${memoryContext}` : ''}
+
+Por favor responde de manera personalizada y útil.`;
+
+    const enhancedPrompt = `${systemPrompt}\n\nUsuario: ${prompt}`;
+    
     // Sanitize prompt before sending to AI
-    const sanitizedPrompt = sanitizePrompt(prompt);
+    const sanitizedPrompt = sanitizePrompt(enhancedPrompt);
     const response = await queryAI(model, sanitizedPrompt);
     
     const duration = Date.now() - startTime;
@@ -54,12 +69,13 @@ async function queryAIWithFallback(model: string, prompt: string, userId?: strin
 
 // Fallback response generator for demonstration
 function generateFallbackResponse(prompt: string): string {
+  // Stelluna's fallback responses
   const responses = [
-    "I understand your question. While I'm currently in demo mode, I can help you explore the features of this AI chat application. Try using the web search or YouTube search features!",
-    "Thanks for your message! This application supports multiple AI models, web search integration, and conversation management. Feel free to test the different features available.",
-    "I appreciate your input. This chat application demonstrates modern AI integration with features like model switching, search capabilities, and conversation history. What would you like to explore?",
-    "Your message has been received. This application showcases how to integrate multiple AI models with web search and YouTube search capabilities. Try switching between different models!",
-    "Thank you for trying out this AI chat application! While running in demo mode, you can still test features like creating new conversations, switching models, and using search integrations."
+    "¡Hola! Soy Stelluna, tu asistente de IA. Aunque estoy en modo demo, puedo ayudarte a explorar las características de esta aplicación. ¡Prueba las funciones de búsqueda web o búsqueda de YouTube!",
+    "Gracias por tu mensaje! Como Stelluna, puedo ayudarte con múltiples modelos de IA, integración de búsqueda web y gestión de conversaciones. ¡Explora las diferentes funciones disponibles!",
+    "Soy Stelluna y aprecio tu mensaje. Esta aplicación demuestra cómo integrar múltiples modelos de IA con capacidades de búsqueda y historial de conversaciones. ¿Qué te gustaría explorar?",
+    "Stelluna aquí! Tu mensaje ha sido recibido. Esta aplicación muestra cómo integrar múltiples modelos de IA con búsqueda web y capacidades de YouTube. ¡Prueba cambiando entre diferentes modelos!",
+    "¡Hola! Soy Stelluna y me da gusto que pruebes esta aplicación de chat con IA. Aunque estoy en modo demo, puedes probar funciones como crear nuevas conversaciones, cambiar modelos y usar integraciones de búsqueda."
   ];
   
   return responses[Math.floor(Math.random() * responses.length)];

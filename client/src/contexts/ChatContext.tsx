@@ -1,4 +1,5 @@
 import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { useMemory } from '@/hooks/useMemory';
 
 // Estado global del chat
 export interface ChatState {
@@ -50,10 +51,11 @@ function chatReducer(state: ChatState, action: ChatAction): ChatState {
   }
 }
 
-// Context
+// Context con memoria incluida
 const ChatContext = createContext<{
   state: ChatState;
   dispatch: React.Dispatch<ChatAction>;
+  memory: ReturnType<typeof useMemory>;
 } | null>(null);
 
 // Provider
@@ -63,9 +65,10 @@ interface ChatProviderProps {
 
 export function ChatProvider({ children }: ChatProviderProps) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
+  const memory = useMemory();
 
   return (
-    <ChatContext.Provider value={{ state, dispatch }}>
+    <ChatContext.Provider value={{ state, dispatch, memory }}>
       {children}
     </ChatContext.Provider>
   );
@@ -93,4 +96,10 @@ export function useChatActions() {
     setError: (error: string | null) => dispatch({ type: 'SET_ERROR', payload: error }),
     clearError: () => dispatch({ type: 'CLEAR_ERROR' }),
   };
+}
+
+// Hook para acceder a la memoria de Stelluna
+export function useChatMemory() {
+  const { memory } = useChat();
+  return memory;
 }

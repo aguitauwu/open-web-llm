@@ -3,10 +3,12 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
+import { useChatMemory } from "@/contexts/ChatContext";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Message } from "./message";
 import { MessageInput } from "./message-input";
+import { StellunaWelcome } from "@/components/StellunaWelcome";
 import { Menu, Trash2, Download, Bot, Lightbulb, Code, Search as SearchIcon } from "lucide-react";
 import stellunaImage from "../../assets/stelluna.jpg";
 import type { Message as MessageType, Conversation } from "@shared/schema";
@@ -22,6 +24,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
   const queryClient = useQueryClient();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
+  const { learnFromMessage, getMemoryContext } = useChatMemory();
 
   const { data: conversation } = useQuery<Conversation>({
     queryKey: ["/api/conversations", selectedConversation],
@@ -187,41 +190,9 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
           </div>
         </div>
 
-        {/* Welcome Content */}
+        {/* Welcome Content - Stelluna personalized welcome */}
         <div className="flex-1 flex items-center justify-center p-4">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="w-16 h-16 rounded-full overflow-hidden mx-auto mb-4">
-              <img src={stellunaImage} alt="Stelluna" className="w-full h-full object-cover" />
-            </div>
-            <h3 className="text-xl font-semibold mb-2">Welcome to Stelluna</h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              Your intelligent AI companion ready to help with various tasks. Enhance conversations with web search and YouTube integration.
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-xl text-left">
-                <Lightbulb className="h-6 w-6 text-yellow-500 mb-2" />
-                <h4 className="font-medium mb-1">Creative Writing</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Generate stories, poems, and creative content
-                </p>
-              </div>
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-xl text-left">
-                <Code className="h-6 w-6 text-green-500 mb-2" />
-                <h4 className="font-medium mb-1">Code Assistant</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Debug, explain, and write code
-                </p>
-              </div>
-              <div className="p-4 bg-gray-100 dark:bg-gray-800 rounded-xl text-left">
-                <SearchIcon className="h-6 w-6 text-blue-500 mb-2" />
-                <h4 className="font-medium mb-1">Research Helper</h4>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Search the web and find information
-                </p>
-              </div>
-            </div>
-          </div>
+          <StellunaWelcome />
         </div>
       </div>
     );
