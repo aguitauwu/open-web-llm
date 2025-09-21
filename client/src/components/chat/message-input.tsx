@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { Paperclip, Send, Search, Youtube, Image } from "lucide-react";
 
 interface MessageInputProps {
@@ -16,6 +17,7 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
   const [includeYouTubeSearch, setIncludeYouTubeSearch] = useState(false);
   const [includeImageSearch, setIncludeImageSearch] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { toast } = useToast();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,8 +139,12 @@ export function MessageInput({ onSendMessage, isLoading }: MessageInputProps) {
                   disabled={true}
                   data-testid="button-attach-file"
                   onClick={() => {
-                    // TODO: Implement file attachment functionality
-                    console.log("File attachment feature coming soon");
+                    // File attachment not implemented yet - show info toast
+                    toast({
+                      title: "Próximamente",
+                      description: "La función de adjuntar archivos estará disponible pronto.",
+                      variant: "default"
+                    });
                   }}
                 >
                   <Paperclip className="h-4 w-4" />

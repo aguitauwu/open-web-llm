@@ -155,4 +155,11 @@ export class MongoStorage implements IStorage {
     
     return newSearchResult as SearchResult;
   }
+
+  async cleanupOldSearchCache(olderThanMs: number = 60 * 60 * 1000 * 24): Promise<void> {
+    const cutoffDate = new Date(Date.now() - olderThanMs);
+    await this.searchResults.deleteMany({
+      createdAt: { $lt: cutoffDate }
+    });
+  }
 }

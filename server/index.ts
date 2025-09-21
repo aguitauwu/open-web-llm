@@ -45,6 +45,19 @@ export async function createApp() {
 
   const server = await registerRoutes(app);
 
+  // Setup periodic cache cleanup (every 6 hours in production)
+  if (config.deployment.isProduction) {
+    setInterval(async () => {
+      try {
+        const { storage } = await import('./storage.js');
+        await storage.cleanupOldSearchCache();
+        AppLogger.info('Search cache cleanup completed');
+      } catch (error) {
+        AppLogger.error('Cache cleanup failed', error);
+      }
+    }, 6 * 60 * 60 * 1000); // 6 hours
+  }
+
   // Enhanced error handling middleware
   app.use((err: any, req: any, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

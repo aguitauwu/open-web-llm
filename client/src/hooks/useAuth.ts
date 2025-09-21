@@ -1,10 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { User } from "@shared/schema";
-
-// Extended user type to include demo mode
-interface AuthUser extends User {
-  isDemo?: boolean;
-}
+import type { AuthUser } from "@shared/schema";
 
 export function useAuth() {
   const { data: user, isLoading, refetch } = useQuery<AuthUser | null>({

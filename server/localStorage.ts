@@ -158,6 +158,19 @@ export class LocalStorage implements IStorage {
     return newSearchResult;
   }
 
+  async cleanupOldSearchCache(olderThanMs: number = 60 * 60 * 1000 * 24): Promise<void> {
+    const cutoffDate = new Date(Date.now() - olderThanMs);
+    const keysToDelete: string[] = [];
+    
+    this.searchResults.forEach((result, key) => {
+      if (result.createdAt && result.createdAt < cutoffDate) {
+        keysToDelete.push(key);
+      }
+    });
+    
+    keysToDelete.forEach(key => this.searchResults.delete(key));
+  }
+
   // Utility methods for local storage
   saveToLocalStorage() {
     if (typeof localStorage !== 'undefined') {

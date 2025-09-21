@@ -110,12 +110,8 @@ export function validateContentType(allowedTypes: string[]) {
   };
 }
 
-// Middleware para limpiar headers sensibles
-export function sanitizeHeaders(req: Request, res: Response, next: NextFunction) {
-  // Remover headers que pueden exponer información sensible
-  delete req.headers['x-forwarded-for'];
-  delete req.headers['x-real-ip'];
-  
+// Middleware para agregar headers de seguridad
+export function addSecurityHeaders(req: Request, res: Response, next: NextFunction) {
   // Agregar headers de seguridad adicionales
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
@@ -142,8 +138,8 @@ export function setupSecurity(app: Express) {
   // Content validation
   app.use(validateContentType(['application/json', 'multipart/form-data']));
   
-  // Header sanitization
-  app.use(sanitizeHeaders);
+  // Security headers
+  app.use(addSecurityHeaders);
   
   // General rate limiting
   app.use('/api/', generalLimiter);

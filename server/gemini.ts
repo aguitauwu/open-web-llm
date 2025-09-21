@@ -37,8 +37,8 @@ async function queryMistralAPI(model: string, prompt: string): Promise<string> {
             throw new Error(`Mistral API error: ${response.statusText}`);
         }
 
-        const result = await response.json();
-        return result.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
+        const data = await response.json();
+        return data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
     } catch (error) {
         console.error("Mistral API error:", error);
         throw error;
@@ -73,8 +73,8 @@ async function queryOpenRouterAPI(model: string, prompt: string): Promise<string
             throw new Error(`OpenRouter API error: ${response.statusText}`);
         }
 
-        const result = await response.json();
-        return result.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
+        const data = await response.json();
+        return data.choices[0]?.message?.content || "Sorry, I couldn't generate a response.";
     } catch (error) {
         console.error("OpenRouter API error:", error);
         throw error;
@@ -127,34 +127,17 @@ export async function generateChatResponseWithContext(messages: Array<{role: str
 // Unified AI query function that routes to the appropriate API
 export async function queryAI(model: string, prompt: string): Promise<string> {
     try {
-        // Only log in development mode
-        if (process.env.NODE_ENV === 'development') {
-            console.log("queryAI called with model:", model);
-        }
-        
         if (model.startsWith("Gemini")) {
             const geminiModel = getGeminiModelName(model);
-            if (process.env.NODE_ENV === 'development') {
-                console.log("Using Gemini model:", geminiModel);
-            }
             return await generateChatResponse(prompt, geminiModel);
         } else if (model.startsWith("Mistral")) {
             const mistralModel = getMistralModelName(model);
-            if (process.env.NODE_ENV === 'development') {
-                console.log("Using Mistral model:", mistralModel);
-            }
             return await queryMistralAPI(mistralModel, prompt);
         } else if (model.startsWith("OpenRouter")) {
             const openRouterModel = getOpenRouterModelName(model);
-            if (process.env.NODE_ENV === 'development') {
-                console.log("Using OpenRouter model:", openRouterModel);
-            }
             return await queryOpenRouterAPI(openRouterModel, prompt);
         } else {
             // Default to Gemini for any unrecognized model
-            if (process.env.NODE_ENV === 'development') {
-                console.log("Using default Gemini model for:", model);
-            }
             return await generateChatResponse(prompt, "gemini-2.5-flash");
         }
     } catch (error) {

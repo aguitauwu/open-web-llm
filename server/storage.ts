@@ -13,7 +13,7 @@ import {
   type InsertSearchResult,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc, and, sql, lt } from "drizzle-orm";
 import { MongoStorage } from "./mongoStorage";
 import { LocalStorage } from "./localStorage";
 
@@ -24,19 +24,20 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   
   // Conversation operations
-  getUserConversations(userId: string): Promise<Conversation[]>;
+  getUserConversations(userId: string, limit?: number, offset?: number): Promise<Conversation[]>;
   createConversation(userId: string, conversation: InsertConversation): Promise<Conversation>;
   getConversation(conversationId: string, userId: string): Promise<Conversation | undefined>;
   updateConversationTitle(conversationId: string, userId: string, title: string): Promise<void>;
   deleteConversation(conversationId: string, userId: string): Promise<void>;
   
   // Message operations
-  getConversationMessages(conversationId: string, userId: string): Promise<Message[]>;
+  getConversationMessages(conversationId: string, userId: string, limit?: number, offset?: number): Promise<Message[]>;
   createMessage(message: InsertMessage): Promise<Message>;
   
   // Search operations
   getCachedSearchResults(query: string, type: string): Promise<SearchResult | undefined>;
   cacheSearchResults(searchResult: InsertSearchResult): Promise<SearchResult>;
+  cleanupOldSearchCache(olderThanMs?: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -62,12 +63,14 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Conversation operations
-  async getUserConversations(userId: string): Promise<Conversation[]> {
+  async getUserConversations(userId: string, limit: number = 50, offset: number = 0): Promise<Conversation[]> {
     return await db
       .select()
       .from(conversations)
       .where(eq(conversations.userId, userId))
-      .orderBy(desc(conversations.updatedAt));
+      .orderBy(desc(conversations.updatedAt))
+      .limit(limit)
+      .offset(offset);
   }
 
   async createConversation(userId: string, conversation: InsertConversation): Promise<Conversation> {
@@ -109,7 +112,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Message operations
-  async getConversationMessages(conversationId: string, userId: string): Promise<Message[]> {
+  async getConversationMessages(conversationId: string, userId: string, limit: number = 100, offset: number = 0): Promise<Message[]> {
     // First verify the conversation belongs to the user
     const conversation = await this.getConversation(conversationId, userId);
     if (!conversation) {
@@ -120,13 +123,15 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(messages)
       .where(eq(messages.conversationId, conversationId))
-      .orderBy(messages.createdAt);
+      .orderBy(messages.createdAt)
+      .limit(limit)
+      .offset(offset);
   }
 
   async createMessage(message: InsertMessage): Promise<Message> {
     const [newMessage] = await db
       .insert(messages)
-      .values(message)
+      .values([message])
       .returning();
     return newMessage;
   }
@@ -156,6 +161,13 @@ export class DatabaseStorage implements IStorage {
       .values(searchResult)
       .returning();
     return newResult;
+  }
+
+  async cleanupOldSearchCache(olderThanMs: number = CACHE_TTL_MS * 24): Promise<void> {
+    const cutoffDate = new Date(Date.now() - olderThanMs);
+    await db
+      .delete(searchResults)
+      .where(lt(searchResults.createdAt, cutoffDate));
   }
 }
 

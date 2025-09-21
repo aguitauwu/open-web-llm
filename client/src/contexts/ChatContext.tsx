@@ -1,4 +1,4 @@
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useMemo, useCallback } from 'react';
 import { useMemory } from '@/hooks/useMemory';
 
 // Estado global del chat
@@ -67,8 +67,15 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [state, dispatch] = useReducer(chatReducer, initialState);
   const memory = useMemory();
 
+  // Memoizar el valor del contexto para prevenir re-renders innecesarios
+  const contextValue = useMemo(() => ({
+    state,
+    dispatch,
+    memory
+  }), [state, memory]);
+
   return (
-    <ChatContext.Provider value={{ state, dispatch, memory }}>
+    <ChatContext.Provider value={contextValue}>
       {children}
     </ChatContext.Provider>
   );
@@ -83,11 +90,12 @@ export function useChat() {
   return context;
 }
 
-// Hooks de conveniencia para acciones específicas
+// Hooks de conveniencia para acciones específicas con memoización
 export function useChatActions() {
   const { dispatch } = useChat();
 
-  return {
+  // Memoizar las funciones de acción para evitar re-renders en componentes hijos
+  return useMemo(() => ({
     setModel: (model: string) => dispatch({ type: 'SET_MODEL', payload: model }),
     setConversation: (id: string | null) => dispatch({ type: 'SET_CONVERSATION', payload: id }),
     toggleSidebar: () => dispatch({ type: 'TOGGLE_SIDEBAR' }),
@@ -95,7 +103,7 @@ export function useChatActions() {
     setTyping: (typing: boolean) => dispatch({ type: 'SET_TYPING', payload: typing }),
     setError: (error: string | null) => dispatch({ type: 'SET_ERROR', payload: error }),
     clearError: () => dispatch({ type: 'CLEAR_ERROR' }),
-  };
+  }), [dispatch]);
 }
 
 // Hook para acceder a la memoria de Stelluna

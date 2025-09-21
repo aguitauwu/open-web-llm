@@ -48,10 +48,12 @@ export const queryClient = new QueryClient({
       refetchInterval: false,
       refetchOnWindowFocus: false,
       staleTime: 5 * 60 * 1000, // 5 minutes - reduces unnecessary refetches
+      gcTime: 10 * 60 * 1000, // 10 minutes - cache garbage collection
       retry: false,
     },
     mutations: {
       retry: false,
+      gcTime: 5 * 60 * 1000, // 5 minutes for mutations
     },
   },
 });

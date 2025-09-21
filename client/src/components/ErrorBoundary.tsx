@@ -37,8 +37,8 @@ export class ErrorBoundary extends Component<Props, State> {
       errorInfo,
     });
 
-    // Aquí podrías enviar el error a un servicio de logging
-    // logErrorToService(error, errorInfo);
+    // Log error to console and potentially to external service
+    this.logErrorToService(error, errorInfo);
   }
 
   handleReset = () => {
@@ -102,6 +102,26 @@ export class ErrorBoundary extends Component<Props, State> {
 
     return this.props.children;
   }
+
+  private logErrorToService(error: Error, errorInfo: ErrorInfo) {
+    // Log to console for development
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    // In production, you could send to an error reporting service
+    if (import.meta.env.PROD) {
+      // Example: Sentry, LogRocket, etc.
+      // errorReportingService.captureException(error, { extra: errorInfo });
+    }
+  }
+
+  public static logErrorToServiceStatic(error: Error, errorInfo?: string) {
+    console.error('Error handled:', error, errorInfo);
+    
+    if (import.meta.env.PROD) {
+      // In production, send to error reporting service
+      // errorReportingService.captureException(error, { extra: { info: errorInfo } });
+    }
+  }
 }
 
 /**
@@ -111,8 +131,8 @@ export function useErrorHandler() {
   return (error: Error, errorInfo?: string) => {
     console.error('Error handled:', error, errorInfo);
     
-    // Aquí podrías enviar el error a un servicio de logging
-    // logErrorToService(error, { info: errorInfo });
+    // Log error for debugging/monitoring
+    ErrorBoundary.logErrorToServiceStatic(error, errorInfo);
     
     // En un caso real, podrías mostrar un toast o notificación
     throw error; // Re-throw para que ErrorBoundary lo capture

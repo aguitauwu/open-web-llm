@@ -36,9 +36,7 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  // Índice para búsquedas por email (ya existe UNIQUE pero mejora performance)
-  index("idx_users_email").on(table.email),
-  // Índice para consultas por fecha de creación
+  // Índice compuesto para consultas por fecha de creación (email ya está indexado por UNIQUE)
   index("idx_users_created").on(table.createdAt),
 ]);
 
@@ -51,9 +49,8 @@ export const conversations = pgTable("conversations", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 }, (table) => [
-  // Índice para consultas frecuentes de conversaciones por usuario ordenadas por fecha
+  // Índice compuesto principal para consultas por usuario ordenadas por fecha de actualización
   index("idx_conversations_user_updated").on(table.userId, table.updatedAt),
-  index("idx_conversations_user_created").on(table.userId, table.createdAt),
 ]);
 
 // Chat messages
@@ -65,10 +62,8 @@ export const messages = pgTable("messages", {
   metadata: jsonb("metadata"), // For storing search results, model info, etc.
   createdAt: timestamp("created_at").defaultNow(),
 }, (table) => [
-  // Índice para consultas frecuentes de mensajes por conversación ordenados por fecha
+  // Índice principal para consultas frecuentes de mensajes por conversación ordenados por fecha
   index("idx_messages_conversation_created").on(table.conversationId, table.createdAt),
-  // Índice para buscar mensajes por rol
-  index("idx_messages_role_created").on(table.role, table.createdAt),
 ]);
 
 // Search results cache
@@ -127,6 +122,12 @@ export const insertSearchResultSchema = createInsertSchema(searchResults).pick({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Extended user type for authentication with demo mode
+export interface AuthUser extends User {
+  isDemo?: boolean;
+}
+
 export type InsertConversation = z.infer<typeof insertConversationSchema>;
 export type Conversation = typeof conversations.$inferSelect;
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
