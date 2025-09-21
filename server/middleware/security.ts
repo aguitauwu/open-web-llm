@@ -52,7 +52,10 @@ export function setupHelmet(app: Express) {
         styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
         imgSrc: ["'self'", "data:", "https:", "blob:"],
-        scriptSrc: ["'self'"],
+        // Permitir scripts inline y eval en desarrollo para Vite
+        scriptSrc: config.deployment.isDevelopment 
+          ? ["'self'", "'unsafe-inline'", "'unsafe-eval'"] 
+          : ["'self'"],
         connectSrc: ["'self'", "https://api.gemini.com", "https://api.mistral.ai", "https://openrouter.ai"],
         frameSrc: ["'none'"],
         objectSrc: ["'none'"],
