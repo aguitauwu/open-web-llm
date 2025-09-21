@@ -1,36 +1,42 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { config, validateConfig } from "./config/index.js";
+import { setupSecurity } from "./middleware/security.js";
+import { AppLogger } from "./utils/logger.js";
 
 export async function createApp() {
+  // Validar configuración antes de inicializar
+  try {
+    validateConfig();
+    AppLogger.info('Configuration validation passed');
+  } catch (error) {
+    AppLogger.error('Configuration validation failed', error);
+    throw error;
+  }
+  
   const app = express();
-  app.use(express.json());
-  app.use(express.urlencoded({ extended: false }));
+  
+  // Setup security middleware early
+  setupSecurity(app);
+  
+  // Body parsing with size limits
+  app.use(express.json({ limit: '10mb' }));
+  app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
-  app.use((req, res, next) => {
+  // Enhanced request logging middleware
+  app.use((req: any, res, next) => {
     const start = Date.now();
-    const path = req.path;
-    let capturedJsonResponse: Record<string, any> | undefined = undefined;
-
-    const originalResJson = res.json;
-    res.json = function (bodyJson, ...args) {
-      capturedJsonResponse = bodyJson;
-      return originalResJson.apply(res, [bodyJson, ...args]);
-    };
-
+    
     res.on("finish", () => {
       const duration = Date.now() - start;
-      if (path.startsWith("/api")) {
-        let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-        if (capturedJsonResponse) {
-          logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+      if (req.path.startsWith("/api")) {
+        AppLogger.request(req, res, duration);
+        
+        // Also keep the existing simple log for development
+        if (config.deployment.isDevelopment) {
+          log(`${req.method} ${req.path} ${res.statusCode} in ${duration}ms`);
         }
-
-        if (logLine.length > 200) {
-          logLine = logLine.slice(0, 199) + "…";
-        }
-
-        log(logLine);
       }
     });
 
@@ -39,17 +45,55 @@ export async function createApp() {
 
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, next: NextFunction) => {
+  // Enhanced error handling middleware
+  app.use((err: any, req: any, res: Response, next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    // Only send response if not already sent
-    if (!res.headersSent) {
-      res.status(status).json({ message });
+    let message = err.message || "Internal Server Error";
+    
+    // Log security events
+    if (status === 429) {
+      AppLogger.security({
+        type: 'rate_limit',
+        ip: req.ip,
+        userId: req.user?.id,
+        details: { endpoint: req.path, method: req.method }
+      });
     }
     
-    // Log the error for debugging but don't throw
-    console.error('Server error:', err);
+    // Log validation errors
+    if (status === 400 && err.message.includes('validation')) {
+      AppLogger.security({
+        type: 'validation_error',
+        ip: req.ip,
+        userId: req.user?.id,
+        details: { endpoint: req.path, error: err.message }
+      });
+    }
+    
+    // Don't expose internal errors in production
+    if (status === 500 && config.deployment.isProduction) {
+      message = "An unexpected error occurred";
+    }
+    
+    // Only send response if not already sent
+    if (!res.headersSent) {
+      res.status(status).json({ 
+        error: message,
+        ...(config.deployment.isDevelopment && { stack: err.stack })
+      });
+    }
+    
+    // Log the error with context
+    AppLogger.error(`Server error: ${err.message}`, {
+      error: err,
+      request: {
+        method: req.method,
+        path: req.path,
+        ip: req.ip,
+        userId: req.user?.id
+      }
+    });
+    
     next();
   });
 

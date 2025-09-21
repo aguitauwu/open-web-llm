@@ -63,15 +63,13 @@ export async function setupGoogleAuth(app: Express) {
         // Save user to database
         await upsertUser(profile);
         
-        // Return user profile
+        // Return user profile (NEVER include tokens in user object for security)
         const user = {
           id: profile.id,
           email: profile.emails?.[0]?.value,
           firstName: profile.name?.givenName,
           lastName: profile.name?.familyName,
           profileImageUrl: profile.photos?.[0]?.value,
-          accessToken,
-          refreshToken
         };
         
         return done(null, user);
