@@ -6,7 +6,7 @@ import type { Express, RequestHandler } from "express";
 import { storage } from "./storage";
 
 if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-  console.warn("Google OAuth credentials not provided. Authentication will not work.");
+  console.warn("⚠️  Google OAuth credentials not provided. Users won't be able to authenticate with Google. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET environment variables.");
 }
 
 export function getSession() {

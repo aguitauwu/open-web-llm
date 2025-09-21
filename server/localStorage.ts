@@ -221,7 +221,7 @@ export class LocalStorage implements IStorage {
           this.messageAttachments = new Map(JSON.parse(messageAttachments));
         }
       } catch (error) {
-        console.warn('Failed to load from localStorage:', error);
+        console.warn('⚠️  Failed to load data from localStorage. Starting with empty storage:', error instanceof Error ? error.message : 'Unknown error');
       }
     }
   }

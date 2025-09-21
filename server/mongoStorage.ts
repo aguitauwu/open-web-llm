@@ -36,12 +36,22 @@ export class MongoStorage implements IStorage {
   }
 
   async connect() {
-    await this.client.connect();
-    console.log('Connected to MongoDB');
+    try {
+      await this.client.connect();
+      console.log('✅ Connected to MongoDB successfully');
+    } catch (error) {
+      console.error('❌ Failed to connect to MongoDB:', error);
+      throw new Error(`MongoDB connection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
   async disconnect() {
-    await this.client.close();
+    try {
+      await this.client.close();
+      console.log('📴 Disconnected from MongoDB');
+    } catch (error) {
+      console.error('⚠️  Error during MongoDB disconnection:', error);
+    }
   }
 
   // User operations

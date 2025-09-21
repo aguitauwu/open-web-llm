@@ -6,9 +6,13 @@ import { config } from '../config/index.js';
 export function handleValidationErrors(req: Request, res: Response, next: NextFunction) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
+    const errorMessages = errors.array().map(error => `${error.param}: ${error.msg}`).join(', ');
+    console.warn(`⚠️  Validation failed for ${req.method} ${req.path}:`, errorMessages);
+    
     return res.status(400).json({
       error: 'Validation failed',
-      details: errors.array()
+      message: 'The request contains invalid data. Please check your input and try again.',
+      details: config.deployment.isDevelopment ? errors.array() : undefined
     });
   }
   next();
@@ -32,8 +36,18 @@ export const validateCreateConversation = [
 
 export const validateUpdateConversation = [
   param('id')
-    .isUUID()
-    .withMessage('Invalid conversation ID format'),
+    .custom((value) => {
+      // Allow demo IDs in demo mode
+      if (typeof value === 'string' && value.startsWith('demo-')) {
+        return true;
+      }
+      // Otherwise require valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(value)) {
+        throw new Error('Invalid conversation ID format. Must be a valid UUID or demo ID.');
+      }
+      return true;
+    }),
   body('title')
     .optional()
     .trim()
@@ -46,8 +60,18 @@ export const validateUpdateConversation = [
 // Validadores para mensajes
 export const validateCreateMessage = [
   body('conversationId')
-    .isUUID()
-    .withMessage('Invalid conversation ID format'),
+    .custom((value) => {
+      // Allow demo IDs in demo mode
+      if (typeof value === 'string' && value.startsWith('demo-')) {
+        return true;
+      }
+      // Otherwise require valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(value)) {
+        throw new Error('Invalid conversation ID format. Must be a valid UUID or demo ID.');
+      }
+      return true;
+    }),
   body('role')
     .isIn(['user', 'assistant'])
     .withMessage('Role must be either "user" or "assistant"'),
@@ -110,11 +134,21 @@ export const validateSearch = [
   handleValidationErrors
 ];
 
-// Validadores para parámetros de ID
+// Validadores para parámetros de ID (con soporte para modo demo)
 export const validateUUIDParam = (paramName: string) => [
   param(paramName)
-    .isUUID()
-    .withMessage(`Invalid ${paramName} format`),
+    .custom((value) => {
+      // Allow demo IDs in demo mode
+      if (typeof value === 'string' && value.startsWith('demo-')) {
+        return true;
+      }
+      // Otherwise require valid UUID
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(value)) {
+        throw new Error(`Invalid ${paramName} format. Must be a valid UUID or demo ID.`);
+      }
+      return true;
+    }),
   handleValidationErrors
 ];
 
