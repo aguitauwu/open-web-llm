@@ -1,4 +1,4 @@
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import helmet from 'helmet';
 import compression from 'compression';
 import responseTime from 'response-time';
@@ -28,11 +28,7 @@ export const aiLimiter = rateLimit({
   },
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req: Request) => {
-    // Rate limit por usuario autenticado o IP
-    const user = (req as any).user;
-    return user?.id || req.ip;
-  },
+  // Temporalmente sin keyGenerator personalizado para evitar errores IPv6
 });
 
 // Rate limiting para búsquedas
