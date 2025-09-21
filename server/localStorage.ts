@@ -379,6 +379,14 @@ export class LocalStorage implements IStorage {
     }
   }
 
+  async updateAttachment(attachmentId: string, userId: string, updates: Partial<Attachment>): Promise<void> {
+    const attachment = this.attachments.get(attachmentId);
+    if (attachment && attachment.userId === userId) {
+      const updatedAttachment = { ...attachment, ...updates };
+      this.attachments.set(attachmentId, updatedAttachment);
+    }
+  }
+
   async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
     const attachment = this.attachments.get(attachmentId);
     if (attachment && attachment.userId === userId) {

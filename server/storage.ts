@@ -48,6 +48,7 @@ export interface IStorage {
   // File attachment operations
   createAttachment(userId: string, attachment: InsertAttachment): Promise<Attachment>;
   getAttachment(attachmentId: string, userId: string): Promise<Attachment | undefined>;
+  updateAttachment(attachmentId: string, userId: string, data: Partial<Attachment>): Promise<void>;
   getUserAttachments(userId: string, limit?: number, offset?: number): Promise<Attachment[]>;
   getMessageAttachments(messageId: string, userId: string): Promise<Attachment[]>;
   linkAttachmentToMessage(messageId: string, attachmentId: string): Promise<MessageAttachment>;
@@ -263,6 +264,16 @@ export class DatabaseStorage implements IStorage {
       .where(and(
         eq(messageAttachments.messageId, messageId),
         eq(messageAttachments.attachmentId, attachmentId)
+      ));
+  }
+
+  async updateAttachment(attachmentId: string, userId: string, data: Partial<Attachment>): Promise<void> {
+    await db
+      .update(attachments)
+      .set(data)
+      .where(and(
+        eq(attachments.id, attachmentId),
+        eq(attachments.userId, userId)
       ));
   }
 

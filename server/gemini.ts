@@ -1,5 +1,7 @@
 import { GoogleGenAI } from "@google/genai";
 import { AppLogger } from './utils/logger.js';
+import fs from 'fs';
+import path from 'path';
 
 // DON'T DELETE THIS COMMENT
 // Follow these instructions when using this blueprint:
@@ -188,4 +190,126 @@ export function getOpenRouterModelName(displayName: string): string {
     };
     
     return modelMap[displayName] || "openai/gpt-4o";
+}
+
+// Análisis de imágenes con Gemini
+export async function analyzeImage(imagePath: string, prompt: string = "Describe what you see in this image in detail."): Promise<string> {
+    try {
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error("Gemini API key not configured");
+        }
+
+        // Verificar que el archivo existe
+        if (!fs.existsSync(imagePath)) {
+            throw new Error(`Image file not found: ${imagePath}`);
+        }
+
+        // Leer la imagen y convertirla a base64
+        const imageBuffer = fs.readFileSync(imagePath);
+        const base64Image = imageBuffer.toString('base64');
+        
+        // Determinar el tipo MIME basado en la extensión
+        const extension = path.extname(imagePath).toLowerCase();
+        const mimeTypeMap: Record<string, string> = {
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif',
+            '.webp': 'image/webp',
+        };
+        const mimeType = mimeTypeMap[extension] || 'image/jpeg';
+
+        // Enviar a Gemini para análisis
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: [
+                {
+                    role: "user",
+                    parts: [
+                        { text: prompt },
+                        {
+                            inlineData: {
+                                mimeType: mimeType,
+                                data: base64Image
+                            }
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!response || !response.text) {
+            throw new Error("Invalid response from Gemini API");
+        }
+
+        AppLogger.info("Image analyzed successfully", {
+            imagePath: path.basename(imagePath),
+            mimeType,
+            responseLength: response.text.length
+        });
+
+        return response.text;
+    } catch (error) {
+        AppLogger.error("Image analysis error", error);
+        throw error;
+    }
+}
+
+// Análisis de documentos de texto
+export async function analyzeTextFile(filePath: string, prompt: string = "Summarize the content of this document."): Promise<string> {
+    try {
+        if (!process.env.GEMINI_API_KEY) {
+            throw new Error("Gemini API key not configured");
+        }
+
+        // Verificar que el archivo existe
+        if (!fs.existsSync(filePath)) {
+            throw new Error(`File not found: ${filePath}`);
+        }
+
+        // Leer el contenido del archivo
+        const content = fs.readFileSync(filePath, 'utf8');
+        
+        // Crear el prompt completo
+        const fullPrompt = `${prompt}\n\nContent of the file:\n---\n${content}\n---`;
+
+        // Usar la función existente para generar respuesta
+        const response = await generateChatResponse(fullPrompt, "gemini-2.5-flash");
+
+        AppLogger.info("Text file analyzed successfully", {
+            filePath: path.basename(filePath),
+            contentLength: content.length,
+            responseLength: response.length
+        });
+
+        return response;
+    } catch (error) {
+        AppLogger.error("Text file analysis error", error);
+        throw error;
+    }
+}
+
+// Función unificada para analizar cualquier tipo de archivo
+export async function analyzeFile(filePath: string, mimeType: string, customPrompt?: string): Promise<string> {
+    try {
+        // Determinar el tipo de análisis basado en el MIME type
+        if (mimeType.startsWith('image/')) {
+            const prompt = customPrompt || "Describe this image in detail. If there's text in the image, extract and transcribe it. If it's a diagram, chart, or infographic, explain its content and meaning.";
+            return await analyzeImage(filePath, prompt);
+        } else if (
+            mimeType === 'text/plain' || 
+            mimeType === 'text/markdown' || 
+            mimeType === 'application/json' ||
+            mimeType.startsWith('text/')
+        ) {
+            const prompt = customPrompt || "Analyze and summarize this document. Extract key points, main topics, and provide insights about the content.";
+            return await analyzeTextFile(filePath, prompt);
+        } else {
+            // Para otros tipos de archivos, proporcionar información básica
+            return `Este archivo es de tipo ${mimeType}. El análisis automático de este tipo de archivo no está disponible, pero el archivo ha sido subido correctamente y está disponible para descargar.`;
+        }
+    } catch (error) {
+        AppLogger.error("File analysis error", { filePath, mimeType, error });
+        return `No se pudo analizar este archivo (${mimeType}). El archivo se ha subido correctamente pero el análisis automático falló.`;
+    }
 }

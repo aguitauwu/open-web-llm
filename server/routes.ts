@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import { setupGoogleAuth, isAuthenticated, optionalAuth } from "./googleAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
-import { queryAI } from "./gemini";
+import { queryAI, analyzeFile } from "./gemini";
 import { aiLimiter, searchLimiter } from "./middleware/security.js";
 import { 
   validateCreateConversation, 
@@ -416,7 +416,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims?.sub || req.user.id;
       const conversationId = req.params.id;
-      const { content, model, includeWebSearch, includeYouTubeSearch, includeImageSearch } = req.body;
+      const { content, model, includeWebSearch, includeYouTubeSearch, includeImageSearch, attachmentIds } = req.body;
       
       // Validación básica
       if (!content || typeof content !== 'string') {
@@ -489,6 +489,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           } catch (error) {
             console.error("Image search error:", error);
+          }
+        }
+
+        // Process attached files if any (demo mode)
+        if (attachmentIds && Array.isArray(attachmentIds) && attachmentIds.length > 0) {
+          try {
+            const fileAnalyses = [];
+            for (const attachmentId of attachmentIds) {
+              // For demo mode, we'll create mock file analysis
+              const mockAnalysis = `[DEMO MODE] File ${attachmentId}: This would contain AI analysis of the uploaded file in a real scenario. The file has been processed and analyzed with AI capabilities.`;
+              fileAnalyses.push(mockAnalysis);
+            }
+            
+            if (fileAnalyses.length > 0) {
+              enhancedPrompt += `\n\nArchivos adjuntos analizados:\n${fileAnalyses
+                .map((analysis: string, index: number) => `${index + 1}. ${analysis}`)
+                .join('\n')}`;
+            }
+          } catch (error) {
+            console.error("File analysis error (demo mode):", error);
           }
         }
 
@@ -611,6 +631,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         } catch (error) {
           console.error("Image search error:", error);
+        }
+      }
+
+      // Process attached files if any (authenticated users)
+      if (attachmentIds && Array.isArray(attachmentIds) && attachmentIds.length > 0) {
+        try {
+          const fileAnalyses = [];
+          for (const attachmentId of attachmentIds) {
+            try {
+              // Get the attachment from storage
+              const attachment = await storage.getAttachment(attachmentId, userId);
+              if (attachment) {
+                // Check if analysis is already available in metadata
+                const metadata = attachment.metadata as any || {};
+                if (metadata.aiAnalysis && metadata.analysisStatus === 'completed') {
+                  fileAnalyses.push(`📎 ${attachment.originalName}: ${metadata.aiAnalysis}`);
+                } else if (metadata.analysisStatus === 'pending') {
+                  fileAnalyses.push(`📎 ${attachment.originalName}: [Analizando...] Este archivo está siendo procesado con IA.`);
+                } else if (metadata.analysisStatus === 'error') {
+                  fileAnalyses.push(`📎 ${attachment.originalName}: Error al analizar el archivo. Archivo disponible pero sin análisis de IA.`);
+                } else {
+                  // No analysis available, provide basic file info
+                  fileAnalyses.push(`📎 ${attachment.originalName} (${attachment.mimeType}, ${(attachment.size / 1024).toFixed(1)} KB): Archivo disponible.`);
+                }
+                
+                // Link attachment to the user message
+                try {
+                  await storage.linkAttachmentToMessage(userMessage.id, attachmentId);
+                } catch (linkError) {
+                  console.warn('Failed to link attachment to message:', linkError);
+                }
+              } else {
+                fileAnalyses.push(`📎 Archivo ${attachmentId}: No encontrado o sin acceso.`);
+              }
+            } catch (attachmentError) {
+              console.error(`Error processing attachment ${attachmentId}:`, attachmentError);
+              fileAnalyses.push(`📎 Error procesando archivo ${attachmentId}.`);
+            }
+          }
+          
+          if (fileAnalyses.length > 0) {
+            enhancedPrompt += `\n\nArchivos adjuntos:\n${fileAnalyses
+              .map((analysis: string, index: number) => `${index + 1}. ${analysis}`)
+              .join('\n')}`;
+          }
+        } catch (error) {
+          console.error("File analysis error:", error);
         }
       }
 

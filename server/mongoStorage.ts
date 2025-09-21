@@ -246,6 +246,13 @@ export class MongoStorage implements IStorage {
     await this.messageAttachments.deleteOne({ messageId, attachmentId });
   }
 
+  async updateAttachment(attachmentId: string, userId: string, updates: Partial<Attachment>): Promise<void> {
+    await this.attachments.updateOne(
+      { id: attachmentId, userId },
+      { $set: updates }
+    );
+  }
+
   async deleteAttachment(attachmentId: string, userId: string): Promise<void> {
     // First remove all message attachments that reference this attachment
     await this.messageAttachments.deleteMany({ attachmentId });

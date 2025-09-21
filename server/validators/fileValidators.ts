@@ -2,17 +2,10 @@ import { z } from 'zod';
 import { Request, Response, NextFunction } from 'express';
 import { insertAttachmentSchema, insertMessageAttachmentSchema } from '@shared/schema';
 
-// Extend Request type to include file from multer
-interface MulterRequest extends Request {
-  file?: {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    size: number;
-    buffer: Buffer;
-  };
-}
+// Type for request with multer file
+type MulterRequest = Request & {
+  file?: Express.Multer.File;
+};
 
 // Validation schema for file upload
 export const fileUploadSchema = insertAttachmentSchema.extend({

@@ -135,7 +135,7 @@ npm run dev
 <div align="center">
 
 ```
-🎉 ¡Listo! Visita http://localhost:5000 y conoce a Stelluna 🎉
+🎉 ¡Listo! Visita https://localhost:5000 y conoce a Stelluna 🎉
 ```
 
 </div>

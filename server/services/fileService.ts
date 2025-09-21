@@ -3,6 +3,7 @@ import path from 'path';
 import crypto from 'crypto';
 import { storage } from '../storage';
 import type { InsertAttachment, Attachment } from '@shared/schema';
+import { analyzeFile } from '../gemini';
 
 // Type for uploaded file
 interface UploadedFile {
@@ -23,7 +24,6 @@ const ALLOWED_MIME_TYPES = [
   'image/png',
   'image/gif',
   'image/webp',
-  'image/svg+xml',
   
   // Documentos
   'application/pdf',
@@ -36,13 +36,10 @@ const ALLOWED_MIME_TYPES = [
   'application/vnd.ms-powerpoint',
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   
-  // Código
+  // Código (seguro)
   'text/javascript',
   'text/css',
-  'text/html',
   'application/json',
-  'text/xml',
-  'application/xml',
   
   // Archivos comprimidos
   'application/zip',
@@ -101,6 +98,8 @@ export class FileService {
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
       'application/vnd.ms-powerpoint': ['.ppt'],
       'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx'],
+      'text/javascript': ['.js'],
+      'text/css': ['.css'],
       'application/json': ['.json'],
       'application/zip': ['.zip'],
       'application/x-rar-compressed': ['.rar'],
@@ -132,7 +131,10 @@ export class FileService {
     // Guardar archivo en disco
     await fs.promises.writeFile(filePath, file.buffer);
 
-    // Crear registro en base de datos
+    // Extraer metadatos básicos
+    const basicMetadata = this.extractMetadata(file);
+
+    // Crear registro en base de datos primero
     const attachmentData: InsertAttachment = {
       filename: fileName,
       originalName: file.originalname,
@@ -140,10 +142,13 @@ export class FileService {
       size: file.size,
       path: relativePath,
       isPublic: false,
-      metadata: this.extractMetadata(file),
+      metadata: basicMetadata,
     };
 
     const attachment = await storage.createAttachment(userId, attachmentData);
+
+    // Analizar archivo con IA de forma asíncrona
+    this.analyzeFileAsync(filePath, file.mimetype, attachment.id, userId);
 
     // Generar URL de acceso si es público
     const url = this.generateFileUrl(attachment);
@@ -154,21 +159,87 @@ export class FileService {
     };
   }
 
+  // Método para analizar archivo de forma asíncrona y actualizar metadatos
+  private async analyzeFileAsync(filePath: string, mimeType: string, attachmentId: string, userId: string): Promise<void> {
+    try {
+      // Analizar el archivo con IA
+      const analysis = await analyzeFile(filePath, mimeType);
+
+      // Obtener el attachment actual
+      const attachment = await storage.getAttachment(attachmentId, userId);
+      if (!attachment) {
+        console.error('Attachment not found for analysis update');
+        return;
+      }
+
+      // Actualizar metadatos con el análisis
+      const currentMetadata = attachment.metadata || {};
+      const updatedMetadata = {
+        ...currentMetadata,
+        aiAnalysis: analysis,
+        analysisDate: new Date().toISOString(),
+        analysisStatus: 'completed'
+      };
+
+      // Actualizar el attachment con el análisis
+      await storage.updateAttachment(attachmentId, userId, { metadata: updatedMetadata });
+
+      console.log(`File analysis completed for ${attachment.originalName}`);
+    } catch (error) {
+      console.error('Error analyzing file:', error);
+      
+      // Actualizar metadatos con error de análisis
+      try {
+        const attachment = await storage.getAttachment(attachmentId, userId);
+        if (attachment) {
+          const currentErrorMetadata = attachment.metadata || {};
+          const errorMetadata = {
+            ...currentErrorMetadata,
+            aiAnalysis: 'Error al analizar el archivo. El archivo está disponible pero no se pudo procesar con IA.',
+            analysisDate: new Date().toISOString(),
+            analysisStatus: 'error',
+            analysisError: error instanceof Error ? error.message : 'Unknown error'
+          };
+
+          await storage.updateAttachment(attachmentId, userId, { metadata: errorMetadata });
+        }
+      } catch (updateError) {
+        console.error('Error updating attachment metadata with error status:', updateError);
+      }
+    }
+  }
+
   private extractMetadata(file: UploadedFile): any {
     const metadata: any = {
       uploadedAt: new Date().toISOString(),
+      analysisStatus: 'pending', // Indica que el análisis está pendiente
     };
 
     // Metadatos específicos para imágenes
     if (file.mimetype.startsWith('image/')) {
-      // Aquí podríamos usar una librería como 'sharp' para extraer dimensiones
       metadata.type = 'image';
+      metadata.supportsAIAnalysis = true;
     }
 
     // Metadatos específicos para documentos
     if (file.mimetype === 'application/pdf') {
       metadata.type = 'document';
       metadata.format = 'pdf';
+      metadata.supportsAIAnalysis = false; // PDF no soportado por ahora
+    }
+
+    // Metadatos para archivos de texto
+    if (file.mimetype.startsWith('text/') || 
+        file.mimetype === 'application/json' ||
+        file.mimetype === 'text/markdown') {
+      metadata.type = 'text';
+      metadata.supportsAIAnalysis = true;
+    }
+
+    // Otros tipos de archivos
+    if (!metadata.type) {
+      metadata.type = 'other';
+      metadata.supportsAIAnalysis = false;
     }
 
     return metadata;
