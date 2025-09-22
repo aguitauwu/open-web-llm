@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage";
+import { storage, demoStorage } from "./storage";
 import { setupGoogleAuth, isAuthenticated, optionalAuth } from "./googleAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
@@ -279,8 +279,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/conversations', optionalAuth, async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
-        // Return demo conversations for non-authenticated users
-        res.json([]);
+        // Return demo conversations from in-memory storage
+        const demoConversations = demoStorage.getConversations();
+        res.json(demoConversations);
       } else {
         const userId = req.user.claims?.sub || req.user.id;
         const conversations = await storage.getUserConversations(userId);
@@ -297,15 +298,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const validatedData = insertConversationSchema.parse(req.body);
       
       if (req.user.isDemo) {
-        // Create temporary conversation for demo mode
-        const demoConversation = {
-          id: `demo-${Date.now()}`,
+        // Create and store conversation in demo storage
+        const demoConversation = demoStorage.createConversation({
           title: validatedData.title,
           userId: 'demo-user',
           model: validatedData.model,
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
+        });
         res.json(demoConversation);
       } else {
         const userId = req.user.claims?.sub || req.user.id;
@@ -325,15 +323,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/conversations/:id', optionalAuth, validateUUIDParam('id'), async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
-        // Return demo conversation
-        const demoConversation = {
-          id: req.params.id,
-          title: "Demo Conversation",
-          userId: 'demo-user',
-          model: 'gemini-pro',
-          createdAt: new Date(),
-          updatedAt: new Date()
-        };
+        // Get demo conversation from storage
+        const conversationId = req.params.id;
+        const demoConversation = demoStorage.getConversation(conversationId);
+        
+        if (!demoConversation) {
+          return res.status(404).json({ message: "Conversation not found" });
+        }
+        
         res.json(demoConversation);
       } else {
         const userId = req.user.claims?.sub || req.user.id;
@@ -355,8 +352,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch('/api/conversations/:id', optionalAuth, validateUpdateConversation, async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
-        // Demo mode - just return success
-        res.json({ message: "Conversation updated successfully (demo mode)" });
+        // Update conversation in demo storage
+        const conversationId = req.params.id;
+        const { title } = req.body;
+        
+        if (!title) {
+          return res.status(400).json({ message: "Title is required" });
+        }
+        
+        const updated = demoStorage.updateConversationTitle(conversationId, title);
+        if (!updated) {
+          return res.status(404).json({ message: "Conversation not found" });
+        }
+        
+        res.json({ message: "Conversation updated successfully" });
       } else {
         const userId = req.user.claims?.sub || req.user.id;
         const conversationId = req.params.id;
@@ -378,8 +387,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete('/api/conversations/:id', optionalAuth, validateUUIDParam('id'), async (req: any, res: any) => {
     try {
       if (req.user.isDemo) {
-        // Demo mode - just return success
-        res.json({ message: "Conversation deleted successfully (demo mode)" });
+        // Delete conversation from demo storage
+        const conversationId = req.params.id;
+        const deleted = demoStorage.deleteConversation(conversationId);
+        
+        if (!deleted) {
+          return res.status(404).json({ message: "Conversation not found" });
+        }
+        
+        res.json({ message: "Conversation deleted successfully" });
       } else {
         const userId = req.user.claims?.sub || req.user.id;
         const conversationId = req.params.id;
@@ -396,9 +412,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/conversations/:id/messages', optionalAuth, async (req: any, res) => {
     try {
       if (req.user.isDemo) {
-        // Return demo messages from temporary storage
+        // Return demo messages from demo storage
         const conversationId = req.params.id;
-        const messages = demoMessages.get(conversationId) || [];
+        const messages = demoStorage.getMessages(conversationId);
         res.json(messages);
       } else {
         const userId = req.user.claims?.sub || req.user.id;

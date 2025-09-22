@@ -371,12 +371,12 @@ class DemoStorage {
   cleanup(): void {
     const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
     
-    for (const [id, conversation] of this.conversations.entries()) {
+    this.conversations.forEach((conversation, id) => {
       if (conversation.createdAt && conversation.createdAt.getTime() < twentyFourHoursAgo) {
         this.conversations.delete(id);
         this.messages.delete(id);
       }
-    }
+    });
   }
 }
 
