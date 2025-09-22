@@ -157,11 +157,11 @@ export async function queryAI(model: string, prompt: string): Promise<string> {
 // Map display names to Gemini model names
 export function getGeminiModelName(displayName: string): string {
     const modelMap: Record<string, string> = {
+        "Gemini 2.0 Flash": "gemini-2.0-flash-exp",
         "Gemini 2.5 Flash": "gemini-2.5-flash",
         "Gemini 2.5 Pro": "gemini-2.5-pro", 
         "Gemini 1.5 Flash": "gemini-1.5-flash",
         "Gemini 1.5 Pro": "gemini-1.5-pro",
-        "Gemini 1.0 Pro": "gemini-1.0-pro",
     };
     
     return modelMap[displayName] || "gemini-2.5-flash";
@@ -170,8 +170,9 @@ export function getGeminiModelName(displayName: string): string {
 // Map display names to Mistral model names
 export function getMistralModelName(displayName: string): string {
     const modelMap: Record<string, string> = {
-        "Mistral Large": "mistral-large-latest",
-        "Mistral 7B": "mistral-7b-instruct",
+        "Mistral Large 2": "mistral-large-latest",
+        "Mistral Small": "mistral-small-latest",
+        "Mistral Nemo": "open-mistral-nemo-2407",
         "Mixtral 8x7B": "mixtral-8x7b-instruct",
         "Mixtral 8x22B": "mixtral-8x22b-instruct",
     };
@@ -183,10 +184,13 @@ export function getMistralModelName(displayName: string): string {
 export function getOpenRouterModelName(displayName: string): string {
     const modelMap: Record<string, string> = {
         "OpenRouter GPT-4o": "openai/gpt-4o",
-        "OpenRouter Claude 3.5": "anthropic/claude-3.5-sonnet",
-        "OpenRouter Llama 3.1 70B": "meta-llama/llama-3.1-70b-instruct",
+        "OpenRouter GPT-4o Mini": "openai/gpt-4o-mini",
+        "OpenRouter Claude 3.5 Sonnet": "anthropic/claude-3.5-sonnet",
+        "OpenRouter Claude 3.5 Haiku": "anthropic/claude-3.5-haiku",
+        "OpenRouter Llama 3.3 70B": "meta-llama/llama-3.3-70b-instruct",
         "OpenRouter Qwen 2.5 72B": "qwen/qwen-2.5-72b-instruct",
-        "OpenRouter DeepSeek V3": "deepseek/deepseek-chat",
+        "OpenRouter DeepSeek V3": "deepseek/deepseek-v3",
+        "OpenRouter Grok Beta": "x-ai/grok-beta",
     };
     
     return modelMap[displayName] || "openai/gpt-4o";

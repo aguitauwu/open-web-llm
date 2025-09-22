@@ -25,24 +25,28 @@ interface SidebarProps {
 
 const models = [
   // Gemini Models
+  "Gemini 2.0 Flash",
   "Gemini 2.5 Flash",
   "Gemini 2.5 Pro",
   "Gemini 1.5 Flash",
   "Gemini 1.5 Pro",
-  "Gemini 1.0 Pro",
   
   // Mistral Models
-  "Mistral Large",
-  "Mistral 7B",
+  "Mistral Large 2",
+  "Mistral Small",
+  "Mistral Nemo",
   "Mixtral 8x7B",
   "Mixtral 8x22B",
   
   // OpenRouter Models
   "OpenRouter GPT-4o",
-  "OpenRouter Claude 3.5",
-  "OpenRouter Llama 3.1 70B",
+  "OpenRouter GPT-4o Mini",
+  "OpenRouter Claude 3.5 Sonnet",
+  "OpenRouter Claude 3.5 Haiku",
+  "OpenRouter Llama 3.3 70B",
   "OpenRouter Qwen 2.5 72B",
   "OpenRouter DeepSeek V3",
+  "OpenRouter Grok Beta",
 ];
 
 export function Sidebar({
@@ -61,7 +65,7 @@ export function Sidebar({
 
   const { data: conversations = [] } = useQuery<Conversation[]>({
     queryKey: ["/api/conversations"],
-    enabled: !!user,
+    enabled: true, // Always enabled to support both demo mode and authenticated users
   });
 
   const deleteConversationMutation = useMutation({
@@ -177,17 +181,18 @@ export function Sidebar({
               <div className="px-2 py-1 text-xs font-medium text-gray-400 dark:text-gray-500">
                 Google Gemini
               </div>
+              <SelectItem value="Gemini 2.0 Flash">Gemini 2.0 Flash</SelectItem>
               <SelectItem value="Gemini 2.5 Flash">Gemini 2.5 Flash</SelectItem>
               <SelectItem value="Gemini 2.5 Pro">Gemini 2.5 Pro</SelectItem>
               <SelectItem value="Gemini 1.5 Flash">Gemini 1.5 Flash</SelectItem>
               <SelectItem value="Gemini 1.5 Pro">Gemini 1.5 Pro</SelectItem>
-              <SelectItem value="Gemini 1.0 Pro">Gemini 1.0 Pro</SelectItem>
               
               <div className="px-2 py-1 mt-2 text-xs font-medium text-gray-400 dark:text-gray-500">
                 Mistral AI
               </div>
-              <SelectItem value="Mistral Large">Mistral Large</SelectItem>
-              <SelectItem value="Mistral 7B">Mistral 7B</SelectItem>
+              <SelectItem value="Mistral Large 2">Mistral Large 2</SelectItem>
+              <SelectItem value="Mistral Small">Mistral Small</SelectItem>
+              <SelectItem value="Mistral Nemo">Mistral Nemo</SelectItem>
               <SelectItem value="Mixtral 8x7B">Mixtral 8x7B</SelectItem>
               <SelectItem value="Mixtral 8x22B">Mixtral 8x22B</SelectItem>
               
@@ -195,10 +200,13 @@ export function Sidebar({
                 OpenRouter
               </div>
               <SelectItem value="OpenRouter GPT-4o">GPT-4o</SelectItem>
-              <SelectItem value="OpenRouter Claude 3.5">Claude 3.5 Sonnet</SelectItem>
-              <SelectItem value="OpenRouter Llama 3.1 70B">Llama 3.1 70B</SelectItem>
+              <SelectItem value="OpenRouter GPT-4o Mini">GPT-4o Mini</SelectItem>
+              <SelectItem value="OpenRouter Claude 3.5 Sonnet">Claude 3.5 Sonnet</SelectItem>
+              <SelectItem value="OpenRouter Claude 3.5 Haiku">Claude 3.5 Haiku</SelectItem>
+              <SelectItem value="OpenRouter Llama 3.3 70B">Llama 3.3 70B</SelectItem>
               <SelectItem value="OpenRouter Qwen 2.5 72B">Qwen 2.5 72B</SelectItem>
               <SelectItem value="OpenRouter DeepSeek V3">DeepSeek V3</SelectItem>
+              <SelectItem value="OpenRouter Grok Beta">Grok Beta</SelectItem>
             </SelectContent>
           </Select>
           <div className="mt-3 flex items-center space-x-2">
