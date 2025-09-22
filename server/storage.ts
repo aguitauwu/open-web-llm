@@ -290,6 +290,104 @@ export class DatabaseStorage implements IStorage {
 // Constants
 const CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour in milliseconds
 
+// Demo storage for non-authenticated users
+class DemoStorage {
+  private conversations: Map<string, Conversation> = new Map();
+  private messages: Map<string, Message[]> = new Map();
+
+  createConversation(conversation: Omit<Conversation, 'id' | 'createdAt' | 'updatedAt'>): Conversation {
+    const now = new Date();
+    const newConversation: Conversation = {
+      id: `demo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      userId: conversation.userId,
+      title: conversation.title,
+      model: conversation.model,
+      createdAt: now,
+      updatedAt: now,
+    };
+    
+    this.conversations.set(newConversation.id, newConversation);
+    return newConversation;
+  }
+
+  getConversations(): Conversation[] {
+    return Array.from(this.conversations.values()).sort((a, b) => 
+      new Date(b.updatedAt!).getTime() - new Date(a.updatedAt!).getTime()
+    );
+  }
+
+  getConversation(conversationId: string): Conversation | undefined {
+    return this.conversations.get(conversationId);
+  }
+
+  deleteConversation(conversationId: string): boolean {
+    const deleted = this.conversations.delete(conversationId);
+    if (deleted) {
+      this.messages.delete(conversationId);
+    }
+    return deleted;
+  }
+
+  updateConversationTitle(conversationId: string, title: string): boolean {
+    const conversation = this.conversations.get(conversationId);
+    if (conversation) {
+      conversation.title = title;
+      conversation.updatedAt = new Date();
+      return true;
+    }
+    return false;
+  }
+
+  createMessage(message: Omit<Message, 'id' | 'createdAt'>): Message {
+    const newMessage: Message = {
+      id: `demo-msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      conversationId: message.conversationId,
+      role: message.role,
+      content: message.content,
+      metadata: message.metadata,
+      createdAt: new Date(),
+    };
+
+    if (!this.messages.has(message.conversationId)) {
+      this.messages.set(message.conversationId, []);
+    }
+    
+    this.messages.get(message.conversationId)!.push(newMessage);
+    
+    // Update conversation timestamp
+    const conversation = this.conversations.get(message.conversationId);
+    if (conversation) {
+      conversation.updatedAt = new Date();
+    }
+    
+    return newMessage;
+  }
+
+  getMessages(conversationId: string): Message[] {
+    return this.messages.get(conversationId) || [];
+  }
+
+  // Cleanup old demo data (older than 24 hours)
+  cleanup(): void {
+    const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
+    
+    for (const [id, conversation] of this.conversations.entries()) {
+      if (conversation.createdAt && conversation.createdAt.getTime() < twentyFourHoursAgo) {
+        this.conversations.delete(id);
+        this.messages.delete(id);
+      }
+    }
+  }
+}
+
+// Global demo storage instance
+export const demoStorage = new DemoStorage();
+
+// Cleanup demo data every hour
+setInterval(() => {
+  demoStorage.cleanup();
+}, 60 * 60 * 1000);
+
 // Storage factory - choose storage type based on environment
 function createStorage(): IStorage {
   const storageType = process.env.STORAGE_TYPE || 'database';
