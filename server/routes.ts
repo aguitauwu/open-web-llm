@@ -241,7 +241,6 @@ async function searchImages(query: string, userId?: string) {
 }
 
 // Temporary storage for demo messages
-const demoMessages: Map<string, any[]> = new Map();
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -415,11 +414,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Return demo messages from demo storage
         const conversationId = req.params.id;
         const messages = demoStorage.getMessages(conversationId);
+        console.log(`[DEBUG] Getting messages for demo conversation ${conversationId}, found ${messages.length} messages:`, messages);
         res.json(messages);
       } else {
         const userId = req.user.claims?.sub || req.user.id;
         const conversationId = req.params.id;
         const messages = await storage.getConversationMessages(conversationId, userId);
+        console.log(`[DEBUG] Getting messages for authenticated user ${userId}, conversation ${conversationId}, found ${messages.length} messages`);
         res.json(messages);
       }
     } catch (error) {
@@ -454,6 +455,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           conversationId,
           role: "user",
           content,
+          metadata: null,
           createdAt: new Date(),
         };
 
@@ -565,10 +567,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           },
         };
 
-        // Save messages to temporary storage
-        const existingMessages = demoMessages.get(conversationId) || [];
-        existingMessages.push(demoMessage, demoAiMessage);
-        demoMessages.set(conversationId, existingMessages);
+        // Save messages to demo storage
+        demoStorage.createMessage(demoMessage);
+        demoStorage.createMessage(demoAiMessage);
 
         return res.json({
           userMessage: demoMessage,
