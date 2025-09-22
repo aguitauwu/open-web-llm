@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { useChatMemory } from "@/contexts/ChatContext";
+import { useChatMemory, useChatActions } from "@/contexts/ChatContext";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest } from "@/lib/queryClient";
 import { Message } from "./message";
@@ -25,6 +25,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [isTyping, setIsTyping] = useState(false);
   const { learnFromMessage, getMemoryContext } = useChatMemory();
+  const { setConversation } = useChatActions();
 
   const { data: conversation } = useQuery<Conversation>({
     queryKey: ["/api/conversations", selectedConversation],
@@ -97,6 +98,7 @@ export function ChatArea({ selectedConversation, selectedModel, onMenuToggle }: 
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+      setConversation(null); // Reset conversation selection after clearing
       toast({
         title: "Chat cleared",
         description: "The conversation has been cleared.",
