@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, RotateCcw, Share, Bot, Search, Youtube, Image, ChevronLeft, ChevronRight, FileText, Download, AlertCircle, Clock, CheckCircle } from "lucide-react";
+import { useTextToSpeech } from "@/hooks/useTextToSpeech";
+import { Copy, RotateCcw, Share, Bot, Search, Youtube, Image, ChevronLeft, ChevronRight, FileText, Download, AlertCircle, Clock, CheckCircle, Volume2, VolumeX, Pause, Play } from "lucide-react";
 import stellunaImage from "../../assets/stelluna.jpg";
 import { formatFileSize, getFileIcon, isImageFile } from "@/types/files";
 import type { Message } from "@shared/schema";
@@ -137,6 +138,7 @@ export function Message({ message, onRegenerate }: MessageProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const { isSupported: isTTSSupported, isSpeaking, isPaused, isLoading: isTTSLoading, speak, pause, resume, stop } = useTextToSpeech();
 
   const handleCopy = async () => {
     try {
@@ -169,6 +171,34 @@ export function Message({ message, onRegenerate }: MessageProps) {
     } else {
       await handleCopy();
     }
+  };
+
+  const handleSpeak = () => {
+    if (isSpeaking) {
+      if (isPaused) {
+        resume();
+      } else {
+        pause();
+      }
+    } else {
+      // Clean text for better TTS experience
+      const cleanText = message.content
+        .replace(/```[\s\S]*?```/g, '[código]') // Replace code blocks
+        .replace(/`([^`]+)`/g, '$1') // Remove inline code backticks
+        .replace(/\*\*([^*]+)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*([^*]+)\*/g, '$1') // Remove italic markdown
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Replace links with just text
+        .replace(/#{1,6}\s/g, '') // Remove heading markers
+        .trim();
+      
+      if (cleanText) {
+        speak(cleanText);
+      }
+    }
+  };
+
+  const handleStopSpeaking = () => {
+    stop();
   };
 
   const formatTime = (date: Date) => {
@@ -365,6 +395,42 @@ export function Message({ message, onRegenerate }: MessageProps) {
           
           {!isUser && (
             <div className="flex items-center space-x-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity">
+              {/* Text-to-Speech Controls */}
+              {isTTSSupported && (
+                <>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className={`h-6 w-6 focus-visible:ring-1 focus-visible:ring-gray-300 ${isSpeaking ? 'text-blue-500 hover:text-blue-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                    onClick={handleSpeak}
+                    title={isSpeaking ? (isPaused ? "Resume reading" : "Pause reading") : "Read aloud"}
+                    aria-label={isSpeaking ? (isPaused ? "Resume reading" : "Pause reading") : "Read aloud"}
+                    data-testid="button-speak-message"
+                    disabled={isTTSLoading}
+                  >
+                    {isTTSLoading ? (
+                      <div className="h-3 w-3 animate-spin rounded-full border border-gray-400 border-t-transparent" />
+                    ) : isSpeaking ? (
+                      isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />
+                    ) : (
+                      <Volume2 className="h-3 w-3" />
+                    )}
+                  </Button>
+                  {isSpeaking && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-red-400 hover:text-red-600 focus-visible:ring-1 focus-visible:ring-gray-300"
+                      onClick={handleStopSpeaking}
+                      title="Stop reading"
+                      aria-label="Stop reading"
+                      data-testid="button-stop-speaking"
+                    >
+                      <VolumeX className="h-3 w-3" />
+                    </Button>
+                  )}
+                </>
+              )}
               <Button
                 variant="ghost"
                 size="icon"
