@@ -25,11 +25,6 @@ export function GoogleServicesPanel() {
     queryKey: ["/api/google/drive/files"],
     enabled: isAuthenticated,
     retry: false,
-    onError: (error: any) => {
-      if (error?.status === 401) {
-        setIsAuthenticated(false);
-      }
-    },
   });
 
   // Gmail Labels Query
@@ -37,11 +32,6 @@ export function GoogleServicesPanel() {
     queryKey: ["/api/google/gmail/labels"],
     enabled: isAuthenticated,
     retry: false,
-    onError: (error: any) => {
-      if (error?.status === 401) {
-        setIsAuthenticated(false);
-      }
-    },
   });
 
   // Gmail Messages Query
@@ -49,12 +39,14 @@ export function GoogleServicesPanel() {
     queryKey: ["/api/google/gmail/messages"],
     enabled: isAuthenticated,
     retry: false,
-    onError: (error: any) => {
-      if (error?.status === 401) {
-        setIsAuthenticated(false);
-      }
-    },
   });
+
+  // Handle authentication errors
+  if (driveFilesError?.status === 401 || gmailLabelsError?.status === 401 || gmailMessagesError?.status === 401) {
+    if (isAuthenticated) {
+      setIsAuthenticated(false);
+    }
+  }
 
   // File Upload Mutation
   const uploadFileMutation = useMutation({
@@ -335,9 +327,9 @@ export function GoogleServicesPanel() {
               <ScrollArea className="h-64">
                 {loadingDriveFiles ? (
                   <p className="text-gray-600 dark:text-gray-400">Cargando archivos...</p>
-                ) : driveFiles.length > 0 ? (
+                ) : driveFiles && driveFiles.length > 0 ? (
                   <div className="space-y-2">
-                    {driveFiles.map((file: any) => (
+                    {driveFiles?.map((file: any) => (
                       <div
                         key={file.id}
                         className="flex items-center justify-between p-2 rounded-lg border"
@@ -421,9 +413,9 @@ export function GoogleServicesPanel() {
               <ScrollArea className="h-64">
                 {loadingGmailMessages ? (
                   <p className="text-gray-600 dark:text-gray-400">Cargando mensajes...</p>
-                ) : gmailMessages.length > 0 ? (
+                ) : gmailMessages && gmailMessages.length > 0 ? (
                   <div className="space-y-2">
-                    {gmailMessages.map((message: any) => (
+                    {gmailMessages?.map((message: any) => (
                       <div
                         key={message.id}
                         className="p-3 rounded-lg border"
