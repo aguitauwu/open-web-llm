@@ -1014,6 +1014,243 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   );
 
+  // Google Services Routes
+  const { googleServices } = await import('./googleServices.js');
+
+  // Google Services validation schemas
+  const googleDriveFolderSchema = z.object({
+    folderName: z.string().min(1, "Folder name is required").max(100, "Folder name too long"),
+  });
+
+  const gmailSendSchema = z.object({
+    to: z.string().email("Invalid email address"),
+    subject: z.string().min(1, "Subject is required").max(200, "Subject too long"),
+    body: z.string().min(1, "Message body is required").max(10000, "Message too long"),
+  });
+
+  const googleDocsCreateSchema = z.object({
+    title: z.string().min(1, "Document title is required").max(100, "Title too long"),
+    content: z.string().optional(),
+  });
+
+  const googleDocsUpdateSchema = z.object({
+    text: z.string().min(1, "Text content is required"),
+    insertIndex: z.number().int().min(1).optional(),
+  });
+
+  const googleDocsShareSchema = z.object({
+    email: z.string().email("Invalid email address").optional(),
+  });
+
+  // Google Drive Routes
+  app.get('/api/google/drive/files', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const files = await googleServices.listDriveFiles(10);
+      
+      res.json(files);
+    } catch (error) {
+      console.error('Error listing Drive files:', error);
+      res.status(500).json({ message: 'Failed to list Drive files' });
+    }
+  });
+
+  app.post('/api/google/drive/upload', optionalAuth, upload.single('file'), async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: 'No file provided' });
+      }
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.uploadFileToDrive(
+        req.file.originalname,
+        req.file.mimetype,
+        req.file.buffer
+      );
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error uploading to Drive:', error);
+      res.status(500).json({ message: 'Failed to upload to Drive' });
+    }
+  });
+
+  app.post('/api/google/drive/folder', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      const validatedData = googleDriveFolderSchema.parse(req.body);
+      const { folderName } = validatedData;
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.createDriveFolder(folderName);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error creating Drive folder:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid folder data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: 'Failed to create Drive folder' });
+      }
+    }
+  });
+
+  // Gmail Routes
+  app.get('/api/google/gmail/labels', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const labels = await googleServices.listGmailLabels();
+      
+      res.json(labels);
+    } catch (error) {
+      console.error('Error listing Gmail labels:', error);
+      res.status(500).json({ message: 'Failed to list Gmail labels' });
+    }
+  });
+
+  app.get('/api/google/gmail/messages', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const messages = await googleServices.listGmailMessages(10);
+      
+      res.json(messages);
+    } catch (error) {
+      console.error('Error listing Gmail messages:', error);
+      res.status(500).json({ message: 'Failed to list Gmail messages' });
+    }
+  });
+
+  app.post('/api/google/gmail/send', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      const validatedData = gmailSendSchema.parse(req.body);
+      const { to, subject, body } = validatedData;
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.sendGmailMessage(to, subject, body);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error sending Gmail message:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid email data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: 'Failed to send Gmail message' });
+      }
+    }
+  });
+
+  // Google Docs Routes
+  app.post('/api/google/docs/create', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      const validatedData = googleDocsCreateSchema.parse(req.body);
+      const { title, content } = validatedData;
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.createGoogleDoc(title, content);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error creating Google Doc:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid document data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: 'Failed to create Google Doc' });
+      }
+    }
+  });
+
+  app.get('/api/google/docs/:documentId', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      const { documentId } = req.params;
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.readGoogleDoc(documentId);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error reading Google Doc:', error);
+      res.status(500).json({ message: 'Failed to read Google Doc' });
+    }
+  });
+
+  app.patch('/api/google/docs/:documentId', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      const { documentId } = req.params;
+      const validatedData = googleDocsUpdateSchema.parse(req.body);
+      const { text, insertIndex } = validatedData;
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.updateGoogleDoc(documentId, text, insertIndex);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error updating Google Doc:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid update data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: 'Failed to update Google Doc' });
+      }
+    }
+  });
+
+  app.post('/api/google/docs/:documentId/share', optionalAuth, async (req: any, res: any) => {
+    try {
+      if (!req.user?.googleTokens) {
+        return res.status(401).json({ message: 'Google authentication required' });
+      }
+
+      const { documentId } = req.params;
+      const validatedData = googleDocsShareSchema.parse(req.body);
+      const { email } = validatedData;
+
+      googleServices.setCredentials(req.user.googleTokens);
+      const result = await googleServices.shareGoogleDoc(documentId, email);
+      
+      res.json(result);
+    } catch (error) {
+      console.error('Error sharing Google Doc:', error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid sharing data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: 'Failed to share Google Doc' });
+      }
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

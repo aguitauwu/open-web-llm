@@ -10,6 +10,7 @@ import { MessageSkeleton } from "@/components/ui/skeleton";
 import { ThemeAutoDetectBanner } from "@/components/ThemeAutoDetectBanner";
 import Landing from "@/pages/landing";
 import Chat from "@/pages/chat";
+import GoogleServices from "@/pages/google-services";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -39,6 +40,7 @@ function Router() {
         ) : (
           <>
             <Route path="/" component={Chat} />
+            <Route path="/google-services" component={GoogleServices} />
           </>
         )}
         <Route component={NotFound} />
