@@ -325,6 +325,53 @@ export async function analyzeImage(imagePath: string, prompt: string = "Describe
     }
 }
 
+// Genera un título conciso para la conversación basado en el mensaje del usuario
+export async function generateConversationTitle(userMessage: string): Promise<string> {
+    try {
+        if (!process.env.GEMINI_API_KEY && !process.env.MISTRAL_API_KEY && !process.env.OPENROUTER_API_KEY) {
+            // Sin API keys, generar título básico
+            const words = userMessage.trim().split(/\s+/).slice(0, 5);
+            return words.join(' ') + (userMessage.trim().split(/\s+/).length > 5 ? '...' : '');
+        }
+
+        const prompt = `Genera un título corto y descriptivo para una conversación basado en este mensaje del usuario. El título debe:
+- Tener máximo 50 caracteres
+- Ser descriptivo y específico
+- Estar en el idioma del mensaje original
+- No incluir comillas ni caracteres especiales
+- Resumir el tema principal
+
+Mensaje del usuario: "${userMessage.substring(0, 200)}..."
+
+Solo responde con el título, sin explicaciones adicionales.`;
+        
+        // Intentar con Gemini primero, luego fallback a otros
+        let title: string;
+        try {
+            title = await generateChatResponse(prompt, "gemini-2.5-flash");
+        } catch (error) {
+            AppLogger.warn("Gemini no disponible para generar título, usando fallback", error);
+            // Fallback: crear título simple basado en las primeras palabras
+            const words = userMessage.trim().split(/\s+/).slice(0, 6);
+            title = words.join(' ') + (userMessage.trim().split(/\s+/).length > 6 ? '...' : '');
+        }
+        
+        // Limpiar y truncar el título
+        const cleanTitle = title
+            .replace(/["'`]/g, '')
+            .replace(/^[^a-zA-Z0-9\u00C0-\u017F\u0100-\u024F\u4e00-\u9fff]+/, '') // Remover caracteres iniciales no alfanuméricos
+            .trim()
+            .substring(0, 50);
+        
+        return cleanTitle || 'Nueva conversación';
+    } catch (error) {
+        AppLogger.error("Error generando título de conversación", error);
+        // Fallback: usar las primeras palabras del mensaje
+        const words = userMessage.trim().split(/\s+/).slice(0, 5);
+        return words.join(' ') + (userMessage.trim().split(/\s+/).length > 5 ? '...' : '') || 'Nueva conversación';
+    }
+}
+
 // Análisis de documentos de texto
 export async function analyzeTextFile(filePath: string, prompt: string = "Summarize the content of this document."): Promise<string> {
     try {

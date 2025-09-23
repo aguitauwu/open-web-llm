@@ -4,7 +4,7 @@ import { storage, demoStorage } from "./storage";
 import { setupGoogleAuth, isAuthenticated, optionalAuth } from "./googleAuth";
 import { insertConversationSchema, insertMessageSchema } from "@shared/schema";
 import { z } from "zod";
-import { queryAI, analyzeFile } from "./gemini";
+import { queryAI, analyzeFile, generateConversationTitle } from "./gemini";
 import { aiLimiter, searchLimiter } from "./middleware/security.js";
 import { 
   validateCreateConversation, 
@@ -570,6 +570,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Save messages to demo storage
         demoStorage.createMessage(demoMessage);
         demoStorage.createMessage(demoAiMessage);
+        
+        // Auto-generate conversation title if it's the default title
+        try {
+          const conversation = demoStorage.getConversation(conversationId);
+          if (conversation && (conversation.title === 'New Chat' || conversation.title === 'Nueva conversación')) {
+            const generatedTitle = await generateConversationTitle(content);
+            demoStorage.updateConversationTitle(conversationId, generatedTitle);
+          }
+        } catch (error) {
+          AppLogger.warn("Failed to auto-generate conversation title for demo user", error);
+        }
 
         return res.json({
           userMessage: demoMessage,
@@ -733,6 +744,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           originalPrompt: content,
         },
       });
+
+      // Auto-generate conversation title if it's the default title
+      try {
+        if (conversation && (conversation.title === 'New Chat' || conversation.title === 'Nueva conversación')) {
+          const generatedTitle = await generateConversationTitle(content);
+          await storage.updateConversationTitle(conversationId, userId, generatedTitle);
+        }
+      } catch (error) {
+        AppLogger.warn("Failed to auto-generate conversation title for authenticated user", error);
+      }
 
       res.json({
         userMessage,
