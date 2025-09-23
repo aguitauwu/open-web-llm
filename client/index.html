@@ -2,7 +2,34 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Stelluna</title>
+    
+    <!-- Progressive Web App Meta Tags -->
+    <meta name="description" content="Stelluna - AI Assistant with advanced capabilities including text-to-speech, Google integrations, and multi-provider AI support" />
+    <meta name="theme-color" content="#3b82f6" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Stelluna" />
+    
+    <!-- Platform-specific optimizations -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="Stelluna" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    
+    <!-- Preload critical resources for better performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
+    <!-- DNS prefetch for external services -->
+    <link rel="dns-prefetch" href="//api.openai.com" />
+    <link rel="dns-prefetch" href="//api.mistral.ai" />
+    <link rel="dns-prefetch" href="//openrouter.ai" />
+    <link rel="dns-prefetch" href="//googleapis.com" />
   </head>
   <body>
     <div id="root"></div>

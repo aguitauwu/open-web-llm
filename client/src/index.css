@@ -55,6 +55,11 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    /* Mobile safe area and scroll optimizations */
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }
 
@@ -72,6 +77,54 @@
   30% {
     transform: scale(1.2);
     opacity: 1;
+  }
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  .mobile-text-size {
+    font-size: 16px; /* Prevent iOS zoom on input focus */
+  }
+  
+  .mobile-touch-target {
+    min-height: 44px; /* iOS recommended touch target */
+    min-width: 44px;
+  }
+  
+  .mobile-safe-area {
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-top: env(safe-area-inset-top);
+  }
+}
+
+/* Android-specific optimizations */
+@media (max-width: 768px) and (-webkit-min-device-pixel-ratio: 1) {
+  .android-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+}
+
+/* Cross-platform font rendering improvements */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* High DPI display optimization */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi-text {
+    text-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Reduced motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
