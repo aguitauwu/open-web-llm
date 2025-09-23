@@ -88,8 +88,9 @@ export function setupCompression(app: Express) {
 // Middleware de response time
 export function setupResponseTime(app: Express) {
   app.use(responseTime((req: Request, res: Response, time: number) => {
-    if (config.deployment.isDevelopment) {
-      console.log(`${req.method} ${req.url} - ${time.toFixed(2)}ms`);
+    // Solo log requests lentas o errores para reducir noise en logs
+    if (config.deployment.isDevelopment && (time > 1000 || res.statusCode >= 400)) {
+      console.log(`${req.method} ${req.url} - ${time.toFixed(2)}ms (${res.statusCode})`);
     }
   }));
 }

@@ -6,9 +6,13 @@ import * as schema from "@shared/schema";
 // Configure WebSocket constructor
 neonConfig.webSocketConstructor = ws;
 
-// Configure more permissive SSL settings for development
-if (process.env.NODE_ENV === 'development') {
+// Configure SSL settings - Use secure settings even in development
+// Only allow insecure connections in development with explicit opt-in
+if (process.env.NODE_ENV === 'development' && process.env.ALLOW_INSECURE_TLS === 'true') {
+  console.warn('⚠️  WARNING: TLS certificate verification is disabled. This should only be used in local development.');
   process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+} else if (process.env.ALLOW_INSECURE_TLS === 'true') {
+  console.error('❌ ERROR: ALLOW_INSECURE_TLS cannot be used in production. Ignoring setting.');
 }
 
 if (!process.env.DATABASE_URL) {
