@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -41,12 +41,16 @@ export function GoogleServicesPanel() {
     retry: false,
   });
 
-  // Handle authentication errors
-  if (driveFilesError?.status === 401 || gmailLabelsError?.status === 401 || gmailMessagesError?.status === 401) {
-    if (isAuthenticated) {
+  // Handle authentication errors in useEffect to avoid setState during render
+  useEffect(() => {
+    const hasAuthError = driveFilesError?.status === 401 || 
+                        gmailLabelsError?.status === 401 || 
+                        gmailMessagesError?.status === 401;
+    
+    if (hasAuthError && isAuthenticated) {
       setIsAuthenticated(false);
     }
-  }
+  }, [driveFilesError, gmailLabelsError, gmailMessagesError, isAuthenticated]);
 
   // File Upload Mutation
   const uploadFileMutation = useMutation({
