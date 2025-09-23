@@ -571,16 +571,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         demoStorage.createMessage(demoMessage);
         demoStorage.createMessage(demoAiMessage);
         
-        // Auto-generate conversation title if it's the default title
-        try {
-          const conversation = demoStorage.getConversation(conversationId);
-          if (conversation && (conversation.title === 'New Chat' || conversation.title === 'Nueva conversación')) {
-            const generatedTitle = await generateConversationTitle(content);
-            demoStorage.updateConversationTitle(conversationId, generatedTitle);
+        // Auto-generate conversation title asynchronously (non-blocking)
+        setImmediate(async () => {
+          try {
+            const conversation = demoStorage.getConversation(conversationId);
+            if (conversation && (conversation.title === 'New Chat' || conversation.title === 'Nueva conversación' || conversation.title === 'Nueva conversación')) {
+              AppLogger.info("Generating automatic title for demo conversation", { conversationId, currentTitle: conversation.title });
+              const generatedTitle = await generateConversationTitle(content);
+              const updated = demoStorage.updateConversationTitle(conversationId, generatedTitle);
+              if (updated) {
+                AppLogger.info("Auto-generated conversation title", { conversationId, newTitle: generatedTitle });
+              } else {
+                AppLogger.warn("Failed to update conversation title in demo storage", { conversationId });
+              }
+            }
+          } catch (error) {
+            AppLogger.warn("Failed to auto-generate conversation title for demo user", error);
           }
-        } catch (error) {
-          AppLogger.warn("Failed to auto-generate conversation title for demo user", error);
-        }
+        });
 
         return res.json({
           userMessage: demoMessage,
@@ -745,15 +753,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
-      // Auto-generate conversation title if it's the default title
-      try {
-        if (conversation && (conversation.title === 'New Chat' || conversation.title === 'Nueva conversación')) {
-          const generatedTitle = await generateConversationTitle(content);
-          await storage.updateConversationTitle(conversationId, userId, generatedTitle);
+      // Auto-generate conversation title asynchronously (non-blocking)
+      setImmediate(async () => {
+        try {
+          if (conversation && (conversation.title === 'New Chat' || conversation.title === 'Nueva conversación' || conversation.title === 'Nueva conversación')) {
+            AppLogger.info("Generating automatic title for authenticated conversation", { conversationId, userId, currentTitle: conversation.title });
+            const generatedTitle = await generateConversationTitle(content);
+            await storage.updateConversationTitle(conversationId, userId, generatedTitle);
+            AppLogger.info("Auto-generated conversation title", { conversationId, userId, newTitle: generatedTitle });
+          }
+        } catch (error) {
+          AppLogger.warn("Failed to auto-generate conversation title for authenticated user", error);
         }
-      } catch (error) {
-        AppLogger.warn("Failed to auto-generate conversation title for authenticated user", error);
-      }
+      });
 
       res.json({
         userMessage,
