@@ -1,6 +1,7 @@
 modules = ["nodejs-20", "postgresql-16"]
 [agent]
 expertMode = true
+integrations = ["javascript_gemini:1.0.0"]
 
 [workflows]
 runButton = "Project"
@@ -39,8 +40,8 @@ localPort = 40033
 externalPort = 3002
 
 [[ports]]
-localPort = 45965
-externalPort = 4200
+localPort = 40483
+externalPort = 5000
 
 [[ports]]
 localPort = 46427
