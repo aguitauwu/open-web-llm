@@ -345,12 +345,38 @@ Mensaje del usuario: "${userMessage.substring(0, 200)}..."
 
 Solo responde con el título, sin explicaciones adicionales.`;
         
-        // Intentar con Gemini primero, luego fallback a otros
-        let title: string;
-        try {
-            title = await generateChatResponse(prompt, "gemini-2.5-flash");
-        } catch (error) {
-            AppLogger.warn("Gemini no disponible para generar título, usando fallback", error);
+        // Intentar con múltiples proveedores de IA en secuencia
+        let title: string = '';
+        let titleGenerated = false;
+        
+        // Lista de modelos a intentar en orden de preferencia (usando nombres de display)
+        const modelsToTry = [
+            { name: "Gemini 2.5 Flash", requiresKey: "GEMINI_API_KEY" },
+            { name: "Mistral Large 2", requiresKey: "MISTRAL_API_KEY" },
+            { name: "OpenRouter GPT-4o Mini", requiresKey: "OPENROUTER_API_KEY" },
+            { name: "OpenRouter Claude 3.5 Haiku", requiresKey: "OPENROUTER_API_KEY" }
+        ];
+        
+        for (const modelConfig of modelsToTry) {
+            // Verificar si la API key requerida está disponible
+            if (!process.env[modelConfig.requiresKey]) {
+                AppLogger.debug(`Saltando ${modelConfig.name}: ${modelConfig.requiresKey} no configurada`);
+                continue;
+            }
+            
+            try {
+                title = await queryAI(modelConfig.name, prompt);
+                titleGenerated = true;
+                AppLogger.info("Título generado exitosamente", { model: modelConfig.name, title });
+                break;
+            } catch (error) {
+                AppLogger.warn(`Fallo al generar título con ${modelConfig.name}`, error);
+                continue;
+            }
+        }
+        
+        if (!titleGenerated) {
+            AppLogger.warn("Todos los proveedores de IA fallaron, usando fallback manual");
             // Fallback: crear título simple basado en las primeras palabras
             const words = userMessage.trim().split(/\s+/).slice(0, 6);
             title = words.join(' ') + (userMessage.trim().split(/\s+/).length > 6 ? '...' : '');
