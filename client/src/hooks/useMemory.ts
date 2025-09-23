@@ -48,17 +48,20 @@ export function useMemory() {
   const [memory, setMemory, clearMemory] = useLocalStorage<UserMemory>('stelluna-memory', defaultMemory);
   const [isLearning, setIsLearning] = useState(false);
 
-  // Actualizar última interacción automáticamente
+  // Solo actualizar última interacción al montar el componente, no en cada render
   useEffect(() => {
-    const updateLastInteraction = () => {
+    // Solo actualizar si ha pasado más de 1 minuto desde la última interacción
+    const now = new Date().toISOString();
+    const lastTime = new Date(memory.lastInteraction);
+    const minutesPassed = (new Date(now).getTime() - lastTime.getTime()) / (1000 * 60);
+    
+    if (minutesPassed > 1) {
       setMemory(prev => ({
         ...prev,
-        lastInteraction: new Date().toISOString(),
+        lastInteraction: now,
       }));
-    };
-
-    updateLastInteraction();
-  }, [setMemory]);
+    }
+  }, []); // Sin dependencias para evitar loops infinitos
 
   // Funciones para actualizar diferentes aspectos de la memoria
   const updateUserName = useCallback((name: string) => {
