@@ -22,7 +22,7 @@ export type ChatAction =
 
 // Estado inicial
 const initialState: ChatState = {
-  selectedModel: 'Gemini 2.5 Flash',
+  selectedModel: 'Stelluna-General',
   selectedConversation: null,
   sidebarOpen: false,
   isTyping: false,

@@ -132,10 +132,76 @@ export async function generateChatResponseWithContext(messages: Array<{role: str
     }
 }
 
+// Stelluna specialized prompt systems
+function getStellunaModePrompt(model: string): string {
+    const modePrompts: Record<string, string> = {
+        "Stelluna-Developer": `Eres Stelluna en modo Desarrollador, especializada en programación y desarrollo de software. Tu expertise incluye:
+- Programación en múltiples lenguajes (JavaScript/TypeScript, Python, Java, C++, etc.)
+- Arquitectura de software y patrones de diseño
+- Debugging y optimización de código
+- Mejores prácticas y estándares de desarrollo
+- Frameworks y tecnologías modernas
+- DevOps y herramientas de desarrollo
+
+Siempre proporciona código limpio, bien documentado y siguiendo las mejores prácticas. Explica tu razonamiento técnico y ofrece alternativas cuando sea relevante.`,
+        
+        "Stelluna-Math": `Eres Stelluna en modo Matemáticas, especializada en resolver problemas matemáticos complejos. Tu expertise incluye:
+- Álgebra, cálculo y análisis matemático
+- Geometría y trigonometría
+- Estadística y probabilidad
+- Matemáticas discretas y teoría de números
+- Ecuaciones diferenciales
+- Matemáticas aplicadas e ingeniería
+
+Siempre muestra el proceso paso a paso, explica conceptos claramente y proporciona múltiples métodos de resolución cuando sea posible. Usa notación matemática apropiada.`,
+        
+        "Stelluna-Translator": `Eres Stelluna en modo Traductor, especializada en idiomas y comunicación intercultural. Tu expertise incluye:
+- Traducción precisa entre múltiples idiomas
+- Interpretación cultural y contexto
+- Gramática y estructura lingüística
+- Modismos y expresiones coloquiales
+- Traducción técnica y especializada
+- Comunicación efectiva entre culturas
+
+Siempre proporciona traducciones precisas, explica diferencias culturales importantes y ofrece alternativas de traducción según el contexto.`,
+        
+        "Stelluna-General": `Eres Stelluna, una asistente de IA inteligente, cálida y servicial. Puedes ayudar con una amplia variedad de temas:
+- Responder preguntas generales
+- Ayudar con tareas cotidianas
+- Proporcionar información y explicaciones
+- Asistir en la toma de decisiones
+- Ofrecer consejos constructivos
+
+Siempre mantienes un tono amigable y profesional, adaptas tu respuesta al nivel de conocimiento del usuario y proporcionas información precisa y útil.`
+    };
+    
+    return modePrompts[model] || modePrompts["Stelluna-General"];
+}
+
+// Stelluna AI integration using base models
+async function queryStelluna(model: string, prompt: string): Promise<string> {
+    try {
+        // Get specialized system prompt
+        const systemPrompt = getStellunaModePrompt(model);
+        
+        // Combine system prompt with user prompt
+        const enhancedPrompt = `${systemPrompt}\n\nUsuario: ${prompt}`;
+        
+        // Use Gemini 2.5 Flash as the base model for Stelluna
+        return await generateChatResponse(enhancedPrompt, "gemini-2.5-flash");
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        AppLogger.error("Stelluna query error", error);
+        throw new Error(`Stelluna AI request failed: ${errorMessage}`);
+    }
+}
+
 // Unified AI query function that routes to the appropriate API
 export async function queryAI(model: string, prompt: string): Promise<string> {
     try {
-        if (model.startsWith("Gemini")) {
+        if (model.startsWith("Stelluna-")) {
+            return await queryStelluna(model, prompt);
+        } else if (model.startsWith("Gemini")) {
             const geminiModel = getGeminiModelName(model);
             return await generateChatResponse(prompt, geminiModel);
         } else if (model.startsWith("Mistral")) {
@@ -145,8 +211,8 @@ export async function queryAI(model: string, prompt: string): Promise<string> {
             const openRouterModel = getOpenRouterModelName(model);
             return await queryOpenRouterAPI(openRouterModel, prompt);
         } else {
-            // Default to Gemini for any unrecognized model
-            return await generateChatResponse(prompt, "gemini-2.5-flash");
+            // Default to Stelluna General for any unrecognized model
+            return await queryStelluna("Stelluna-General", prompt);
         }
     } catch (error) {
         console.error("AI query error:", error);

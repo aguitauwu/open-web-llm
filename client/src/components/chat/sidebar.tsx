@@ -24,6 +24,12 @@ interface SidebarProps {
 }
 
 const models = [
+  // Stelluna Specialized Models
+  "Stelluna-Developer",
+  "Stelluna-Math", 
+  "Stelluna-Translator",
+  "Stelluna-General",
+  
   // Gemini Models
   "Gemini 2.0 Flash",
   "Gemini 2.5 Flash",
@@ -48,6 +54,26 @@ const models = [
   "OpenRouter DeepSeek V3",
   "OpenRouter Grok Beta",
 ];
+
+// Model descriptions for tooltips and info
+const modelDescriptions: Record<string, { description: string; icon: string; }> = {
+  "Stelluna-Developer": {
+    description: "Especializado en programación, desarrollo de software, debugging, arquitectura de código, y mejores prácticas de desarrollo.",
+    icon: "💻"
+  },
+  "Stelluna-Math": {
+    description: "Optimizado para matemáticas, álgebra, cálculo, estadística, geometría, y resolución de problemas matemáticos complejos.",
+    icon: "📊" 
+  },
+  "Stelluna-Translator": {
+    description: "Especializado en traducción de idiomas, interpretación cultural, gramática, y comunicación intercultural.",
+    icon: "🌐"
+  },
+  "Stelluna-General": {
+    description: "Modo general de Stelluna para conversaciones cotidianas, consultas generales y asistencia en múltiples temas.",
+    icon: "⭐"
+  }
+};
 
 export function Sidebar({
   selectedModel,
@@ -178,7 +204,35 @@ export function Sidebar({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <div className="px-2 py-1 text-xs font-medium text-gray-400 dark:text-gray-500">
+              <div className="px-2 py-1 text-xs font-medium text-blue-600 dark:text-blue-400">
+                Stelluna Specialized
+              </div>
+              <SelectItem value="Stelluna-Developer" data-testid="select-stelluna-developer">
+                <div className="flex items-center space-x-2">
+                  <span>💻</span>
+                  <span>Stelluna Developer</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Stelluna-Math" data-testid="select-stelluna-math">
+                <div className="flex items-center space-x-2">
+                  <span>📊</span>
+                  <span>Stelluna Math</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Stelluna-Translator" data-testid="select-stelluna-translator">
+                <div className="flex items-center space-x-2">
+                  <span>🌐</span>
+                  <span>Stelluna Translator</span>
+                </div>
+              </SelectItem>
+              <SelectItem value="Stelluna-General" data-testid="select-stelluna-general">
+                <div className="flex items-center space-x-2">
+                  <span>⭐</span>
+                  <span>Stelluna General</span>
+                </div>
+              </SelectItem>
+              
+              <div className="px-2 py-1 mt-2 text-xs font-medium text-gray-400 dark:text-gray-500">
                 Google Gemini
               </div>
               <SelectItem value="Gemini 2.0 Flash">Gemini 2.0 Flash</SelectItem>
@@ -213,6 +267,25 @@ export function Sidebar({
             <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
             <span className="text-xs text-gray-500 dark:text-gray-400">Model ready</span>
           </div>
+          {/* Model description for Stelluna models */}
+          {selectedModel.startsWith('Stelluna-') && (
+            <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+              <div className="flex items-start space-x-2">
+                <span className="text-lg">{modelDescriptions[selectedModel]?.icon}</span>
+                <div>
+                  <p className="text-xs text-blue-700 dark:text-blue-300 font-medium mb-1">
+                    {selectedModel === 'Stelluna-Developer' && 'Modo Desarrollo'}
+                    {selectedModel === 'Stelluna-Math' && 'Modo Matemáticas'}
+                    {selectedModel === 'Stelluna-Translator' && 'Modo Traductor'}
+                    {selectedModel === 'Stelluna-General' && 'Modo General'}
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 leading-relaxed">
+                    {modelDescriptions[selectedModel]?.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Search Features */}
