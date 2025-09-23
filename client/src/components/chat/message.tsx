@@ -394,22 +394,22 @@ export function Message({ message, onRegenerate }: MessageProps) {
           </div>
           
           {!isUser && (
-            <div className="flex items-center space-x-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100 transition-opacity">
-              {/* Text-to-Speech Controls */}
+            <div className="flex items-center space-x-1 transition-opacity">
+              {/* Text-to-Speech Controls - Always Visible */}
               {isTTSSupported && (
                 <>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`h-6 w-6 focus-visible:ring-1 focus-visible:ring-gray-300 ${isSpeaking ? 'text-blue-500 hover:text-blue-600' : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300'}`}
+                    className={`h-7 w-7 focus-visible:ring-1 focus-visible:ring-gray-300 ${isSpeaking ? 'text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
                     onClick={handleSpeak}
-                    title={isSpeaking ? (isPaused ? "Resume reading" : "Pause reading") : "Read aloud"}
+                    title={isSpeaking ? (isPaused ? "Reanudar lectura" : "Pausar lectura") : "Leer en voz alta"}
                     aria-label={isSpeaking ? (isPaused ? "Resume reading" : "Pause reading") : "Read aloud"}
                     data-testid="button-speak-message"
                     disabled={isTTSLoading}
                   >
                     {isTTSLoading ? (
-                      <div className="h-3 w-3 animate-spin rounded-full border border-gray-400 border-t-transparent" />
+                      <div className="h-3 w-3 animate-spin rounded-full border border-blue-400 border-t-transparent" />
                     ) : isSpeaking ? (
                       isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />
                     ) : (
@@ -420,9 +420,9 @@ export function Message({ message, onRegenerate }: MessageProps) {
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-red-400 hover:text-red-600 focus-visible:ring-1 focus-visible:ring-gray-300"
+                      className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 focus-visible:ring-1 focus-visible:ring-gray-300"
                       onClick={handleStopSpeaking}
-                      title="Stop reading"
+                      title="Detener lectura"
                       aria-label="Stop reading"
                       data-testid="button-stop-speaking"
                     >

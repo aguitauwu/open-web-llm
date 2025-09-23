@@ -10,7 +10,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Moon, Sun, Plus, Search, Youtube, MoreHorizontal, Trash2, LogOut, Menu } from "lucide-react";
+import { Moon, Sun, Plus, Search, Youtube, MoreHorizontal, Trash2, LogOut, Menu, Settings, HardDrive, Mail, FileText } from "lucide-react";
 import type { Conversation } from "@shared/schema";
 
 interface SidebarProps {
@@ -288,10 +288,10 @@ export function Sidebar({
           )}
         </div>
 
-        {/* Search Features */}
+        {/* Search Features & Google Services */}
         <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
           <div className="mb-3">
-            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Capabilities</h3>
+            <h3 className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">Features</h3>
           </div>
           <div className="space-y-3">
             <div className="flex items-center space-x-3 text-sm">
@@ -312,6 +312,31 @@ export function Sidebar({
                 <div className="text-xs text-gray-500 dark:text-gray-400">Video content search</div>
               </div>
             </div>
+            {/* Google Services Button */}
+            <Button
+              variant="ghost"
+              className="w-full justify-start h-auto p-3 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/30 dark:hover:to-purple-900/30 border border-blue-200 dark:border-blue-700/50"
+              onClick={() => window.location.href = '/google-services'}
+              data-testid="button-google-services"
+            >
+              <div className="flex items-center space-x-3 w-full">
+                <div className="flex -space-x-1">
+                  <div className="w-5 h-5 rounded-full bg-blue-500 flex items-center justify-center">
+                    <HardDrive className="h-2.5 w-2.5 text-white" />
+                  </div>
+                  <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center">
+                    <Mail className="h-2.5 w-2.5 text-white" />
+                  </div>
+                  <div className="w-5 h-5 rounded-full bg-orange-500 flex items-center justify-center">
+                    <FileText className="h-2.5 w-2.5 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1 text-left">
+                  <div className="text-sm font-medium text-gray-900 dark:text-gray-100">Google Services</div>
+                  <div className="text-xs text-gray-600 dark:text-gray-400">Drive, Gmail & Docs</div>
+                </div>
+              </div>
+            </Button>
           </div>
         </div>
 

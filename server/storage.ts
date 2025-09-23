@@ -298,7 +298,7 @@ class DemoStorage {
   createConversation(conversation: Omit<Conversation, 'id' | 'createdAt' | 'updatedAt'>): Conversation {
     const now = new Date();
     const newConversation: Conversation = {
-      id: `demo-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `demo-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       userId: conversation.userId,
       title: conversation.title,
       model: conversation.model,
@@ -340,7 +340,7 @@ class DemoStorage {
 
   createMessage(message: Omit<Message, 'id' | 'createdAt'>): Message {
     const newMessage: Message = {
-      id: `demo-msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      id: `demo-msg-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
       conversationId: message.conversationId,
       role: message.role,
       content: message.content,
