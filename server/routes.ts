@@ -779,7 +779,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Search routes
-  app.post('/api/search/web', isAuthenticated, async (req: any, res) => {
+  app.post('/api/search/web', searchLimiter, isAuthenticated, async (req: any, res) => {
     try {
       const { query } = req.body;
       if (!query) {
@@ -805,7 +805,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/search/youtube', isAuthenticated, async (req: any, res) => {
+  app.post('/api/search/youtube', searchLimiter, isAuthenticated, async (req: any, res) => {
     try {
       const { query } = req.body;
       if (!query) {
