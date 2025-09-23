@@ -139,6 +139,12 @@ export function Message({ message, onRegenerate }: MessageProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
   const { isSupported: isTTSSupported, isSpeaking, isPaused, isLoading: isTTSLoading, speak, pause, resume, stop } = useTextToSpeech();
+  
+  // Check if running in mobile app or unsupported context
+  const isInMobileApp = typeof window !== 'undefined' && 
+    (window.navigator.userAgent.includes('Replit-Bonsai') || 
+     window.navigator.userAgent.includes('wv') || 
+     !('speechSynthesis' in window));
 
   const handleCopy = async () => {
     try {
@@ -395,42 +401,60 @@ export function Message({ message, onRegenerate }: MessageProps) {
           
           {!isUser && (
             <div className="flex items-center space-x-1 transition-opacity">
-              {/* Text-to-Speech Controls - Always Visible */}
-              {isTTSSupported && (
-                <>
+              {/* Text-to-Speech Controls - Always Visible for AI messages */}
+              <>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-7 w-7 focus-visible:ring-1 focus-visible:ring-gray-300 ${
+                    !isTTSSupported 
+                      ? 'text-gray-300 dark:text-gray-600 cursor-not-allowed' 
+                      : isSpeaking 
+                        ? 'text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/20' 
+                        : 'text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                  }`}
+                  onClick={isTTSSupported ? handleSpeak : undefined}
+                  title={
+                    !isTTSSupported 
+                      ? isInMobileApp 
+                        ? "Text-to-speech no disponible en aplicación móvil. Usa un navegador web."
+                        : "Text-to-speech no soportado en este navegador"
+                      : isSpeaking 
+                        ? (isPaused ? "Reanudar lectura" : "Pausar lectura") 
+                        : "Leer en voz alta"
+                  }
+                  aria-label={
+                    !isTTSSupported 
+                      ? "Text-to-speech not supported" 
+                      : isSpeaking 
+                        ? (isPaused ? "Resume reading" : "Pause reading") 
+                        : "Read aloud"
+                  }
+                  data-testid="button-speak-message"
+                  disabled={isTTSLoading || !isTTSSupported}
+                >
+                  {isTTSLoading ? (
+                    <div className="h-3 w-3 animate-spin rounded-full border border-blue-400 border-t-transparent" />
+                  ) : isSpeaking ? (
+                    isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />
+                  ) : (
+                    <Volume2 className="h-3 w-3" />
+                  )}
+                </Button>
+                {isSpeaking && isTTSSupported && (
                   <Button
                     variant="ghost"
                     size="icon"
-                    className={`h-7 w-7 focus-visible:ring-1 focus-visible:ring-gray-300 ${isSpeaking ? 'text-blue-500 hover:text-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'}`}
-                    onClick={handleSpeak}
-                    title={isSpeaking ? (isPaused ? "Reanudar lectura" : "Pausar lectura") : "Leer en voz alta"}
-                    aria-label={isSpeaking ? (isPaused ? "Resume reading" : "Pause reading") : "Read aloud"}
-                    data-testid="button-speak-message"
-                    disabled={isTTSLoading}
+                    className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 focus-visible:ring-1 focus-visible:ring-gray-300"
+                    onClick={handleStopSpeaking}
+                    title="Detener lectura"
+                    aria-label="Stop reading"
+                    data-testid="button-stop-speaking"
                   >
-                    {isTTSLoading ? (
-                      <div className="h-3 w-3 animate-spin rounded-full border border-blue-400 border-t-transparent" />
-                    ) : isSpeaking ? (
-                      isPaused ? <Play className="h-3 w-3" /> : <Pause className="h-3 w-3" />
-                    ) : (
-                      <Volume2 className="h-3 w-3" />
-                    )}
+                    <VolumeX className="h-3 w-3" />
                   </Button>
-                  {isSpeaking && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-7 w-7 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 focus-visible:ring-1 focus-visible:ring-gray-300"
-                      onClick={handleStopSpeaking}
-                      title="Detener lectura"
-                      aria-label="Stop reading"
-                      data-testid="button-stop-speaking"
-                    >
-                      <VolumeX className="h-3 w-3" />
-                    </Button>
-                  )}
-                </>
-              )}
+                )}
+              </>
               <Button
                 variant="ghost"
                 size="icon"
