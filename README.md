@@ -15,7 +15,9 @@
 <img src="./attached_assets/ff3906f9c4bf2e6125b0b5a4e702e1c3_1758332365697.jpg" alt="Stelluna AI Bot" width="300" style="border-radius: 25px; margin: 20px 0; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
 
 ### *"¡Hola! Soy Stelluna, tu asistente de IA favorito! 🌟"*
-### *Estoy aquí para hacer que chatear con IA sea fácil, divertido y económico* 💫
+### *Inteligencia artificial conversacional avanzada diseñada para ser accesible, eficiente y económica* 💫
+
+**Stelluna AI Chat** es una plataforma de chat inteligente basada en Google Gemini que ofrece una interfaz unificada y amigable para conversación natural, análisis de archivos adjuntos, y funcionalidades multimodales para una experiencia de IA completa y accesible.
 
 <br>
 
@@ -39,27 +41,29 @@
 
 </div>
 
-### 🌈 Características Mágicas
+### 🌈 Capacidades Técnicas Avanzadas
 
 <table>
 <tr>
 <td width="50%">
 
 ```
-🤖 Múltiples cerebros de IA
-🗣️ Conversaciones infinitas  
-🎨 Modo demo súper fácil
-🌙 Tema oscuro relajante
+🤖 Google Gemini AI integrado
+💬 Respuestas de conversación inteligentes  
+🎭 Modo demo con funcionalidades completas
+🌙 Interfaz adaptativa con tema oscuro/claro
+🔊 Text-to-Speech integrado para accesibilidad
 ```
 
 </td>
 <td width="50%">
 
 ```
-🔍 Búsqueda súper inteligente
-🔐 Login seguro con Google
-📱 Hermoso en cualquier pantalla  
-🛡️ Tus datos súper seguros
+📁 Análisis de archivos adjuntos con IA
+🔐 Autenticación OAuth2 segura con Google
+📱 Interfaz responsive y moderna
+🗄️ Persistencia de conversaciones
+🛡️ Gestión segura de sesiones y APIs
 ```
 
 </td>
@@ -68,27 +72,42 @@
 
 <div align="center">
 
-### 🎭 **Proveedores de IA Disponibles**
+### 🎭 **Modelo de IA Principal**
+
+<div align="center">
 
 <table>
 <tr>
-<td align="center" width="33%">
+<td align="center" width="100%">
 <h3>🧠</h3>
-<strong>Google Gemini</strong>
-<br><em>Súper inteligente</em>
-</td>
-<td align="center" width="33%">
-<h3>🚀</h3>
-<strong>Mistral AI</strong>
-<br><em>Súper rápido</em>
-</td>
-<td align="center" width="33%">
-<h3>🌐</h3>
-<strong>OpenRouter</strong>
-<br><em>Muchas opciones</em>
+<strong>Google Gemini 2.5 Flash</strong>
+<br><em>Modelo multimodal avanzado</em>
+<br>• Procesamiento de texto e imágenes
+<br>• Ventana de contexto extendida
+<br>• Optimizado para velocidad y calidad
+<br>• Análisis de archivos adjuntos con IA
 </td>
 </tr>
 </table>
+
+</div>
+
+### 🧠 **Arquitectura de IA de Stelluna**
+
+<div align="left">
+
+**Sistema de IA con Google Gemini:**
+- **Modelo Principal:** Google Gemini integrado vía API oficial
+- **Context Management:** Mantiene el historial de conversación completo
+- **Gestión de Sesiones:** Persistencia de conversaciones en base de datos
+
+**Capacidades de Procesamiento:**
+- ✨ **Texto:** Conversación natural, análisis, resúmenes, código
+- 🖼️ **Imágenes:** Análisis visual de archivos adjuntos
+- 🔊 **Audio:** Síntesis de voz (Text-to-Speech) con Web Speech API
+- 📁 **Archivos:** Análisis automático de documentos e imágenes adjuntas
+
+</div>
 
 </div>
 
@@ -152,33 +171,17 @@ npm run dev
 
 </div>
 
-### 🌟 **Para que Stelluna pueda pensar** (Elige al menos una)
+### 🌟 **Para que Stelluna pueda pensar**
 
-<table>
-<tr>
-<td width="33%" align="center">
+<div align="center">
+
 <h4>🧠 Google Gemini</h4>
 <a href="https://aistudio.google.com/app/apikey">
 <img src="https://img.shields.io/badge/Obtener_API_Key-4285F4?style=for-the-badge&logo=google&logoColor=white"/>
 </a>
 <br><em>¡Gratis y súper inteligente!</em>
-</td>
-<td width="33%" align="center">
-<h4>🚀 Mistral AI</h4>
-<a href="https://console.mistral.ai/">
-<img src="https://img.shields.io/badge/Obtener_API_Key-FF6B00?style=for-the-badge&logoColor=white"/>
-</a>
-<br><em>¡Rápido como un rayo!</em>
-</td>
-<td width="33%" align="center">
-<h4>🌐 OpenRouter</h4>
-<a href="https://openrouter.ai/keys">
-<img src="https://img.shields.io/badge/Obtener_API_Key-000000?style=for-the-badge&logoColor=white"/>
-</a>
-<br><em>¡Muchos modelos en uno!</em>
-</td>
-</tr>
-</table>
+
+</div>
 
 ### 🔐 **Para que puedas entrar de forma segura**
 
@@ -203,24 +206,6 @@ npm run dev
 
 </div>
 
-### 🔍 **Para búsquedas súper inteligentes** (Opcional pero genial)
-
-<table>
-<tr>
-<td width="50%" align="center">
-<h4>🌐 Google Search</h4>
-<a href="https://developers.google.com/custom-search/v1/introduction">
-<img src="https://img.shields.io/badge/Custom_Search_API-4285F4?style=for-the-badge&logo=google&logoColor=white"/>
-</a>
-</td>
-<td width="50%" align="center">
-<h4>📺 YouTube API</h4>
-<a href="https://console.cloud.google.com/">
-<img src="https://img.shields.io/badge/YouTube_Data_API-FF0000?style=for-the-badge&logo=youtube&logoColor=white"/>
-</a>
-</td>
-</tr>
-</table>
 
 ---
 
@@ -246,15 +231,8 @@ SESSION_SECRET=una_clave_muy_muy_muy_segura_aqui
 GOOGLE_CLIENT_ID=tu_google_client_id_aqui
 GOOGLE_CLIENT_SECRET=tu_google_client_secret_aqui
 
-# 🤖 Cerebros de IA (al menos uno)
-GOOGLE_API_KEY=tu_google_gemini_api_key
-MISTRAL_API_KEY=tu_mistral_api_key  
-OPENROUTER_API_KEY=tu_openrouter_api_key
-
-# 🔍 Búsquedas inteligentes (opcional)
-GOOGLE_SEARCH_API_KEY=tu_google_search_api_key
-GOOGLE_SEARCH_ENGINE_ID=tu_search_engine_id
-YOUTUBE_API_KEY=tu_youtube_api_key
+# 🤖 IA con Google Gemini
+GEMINI_API_KEY=tu_google_gemini_api_key
 ```
 
 ---
@@ -318,33 +296,165 @@ YOUTUBE_API_KEY=tu_youtube_api_key
 
 ---
 
-## 🛠️ Para desarrolladores curiosos
+## 🛠️ Arquitectura Técnica
 
-### 📁 **Estructura súper organizada**
+### 🏗️ **Stack Tecnológico Moderno**
+
+<table>
+<tr>
+<td width="50%" align="center">
+
+**Frontend (Client)**
+```typescript
+⚛️ React 18 + TypeScript
+🎨 TailwindCSS + Radix UI
+🔄 TanStack Query (Estado del servidor)
+🧭 Wouter (Enrutamiento ligero)  
+📱 PWA + Responsive Design
+🔊 Web Speech API (TTS)
+```
+
+</td>
+<td width="50%" align="center">
+
+**Backend (Server)**
+```typescript
+🚀 Node.js + Express + TypeScript
+🤖 Google Gemini API integrada
+🗄️ MongoDB + In-Memory Storage
+🔐 Passport.js (OAuth2 con Google)
+🗂️ Gestión de sesiones con cookies
+⚡ Drizzle ORM + Zod validation
+```
+
+</td>
+</tr>
+</table>
+
+### 📁 **Arquitectura de Componentes**
 
 ```
 🏗️ stelluna-ai-chat/
-├── 🎨 client/src/          # Frontend bonito en React
-│   ├── 🧩 components/      # Componentes reutilizables
-│   ├── 📄 pages/          # Páginas de la app
-│   ├── 🪝 hooks/          # Hooks personalizados
-│   └── 📚 lib/            # Utilidades mágicas
-├── ⚡ server/             # Backend poderoso en Express
-│   ├── 🛣️ routes.ts       # Rutas de la API
-│   ├── 💾 storage.ts      # Manejo de datos
-│   └── 🔐 googleAuth.ts   # Autenticación Google
-├── 🤝 shared/             # Código compartido
-│   └── 📋 schema.ts       # Esquemas de datos
-└── 📦 dist/               # Build listo para producción
+├── 🎨 client/src/                    # React Frontend (TypeScript)
+│   ├── 🧩 components/                # Componentes UI reutilizables
+│   │   ├── chat/                     # Componentes del chat
+│   │   │   ├── chat-area.tsx         # Área principal de mensajes
+│   │   │   ├── message.tsx           # Componente de mensaje con TTS
+│   │   │   └── message-input.tsx     # Input con adjuntos y botones
+│   │   ├── ui/                       # Componentes base (Radix + shadcn)
+│   │   └── layout/                   # Layout y navegación
+│   ├── 🪝 hooks/                     # React Hooks personalizados
+│   │   ├── useAuth.ts                # Gestión de autenticación
+│   │   ├── useTextToSpeech.ts        # Text-to-Speech integrado
+│   │   └── useConversations.ts       # Estado de conversaciones
+│   ├── 📚 lib/                       # Utilidades y configuración
+│   │   ├── queryClient.ts            # TanStack Query setup
+│   │   └── utils.ts                  # Helpers y validaciones
+│   └── 📄 pages/                     # Páginas de la aplicación
+├── ⚡ server/                        # Express.js Backend (TypeScript)  
+│   ├── 🛣️ routes.ts                  # API Routes RESTful
+│   ├── 🤖 gemini.ts                  # Integración Google Gemini
+│   ├── 💾 storage.ts                 # Abstracción de base de datos
+│   └── 🔐 googleAuth.ts              # OAuth2 con Google
+├── 🤝 shared/                        # Código compartido entre frontend/backend
+│   └── 📋 schema.ts                  # Esquemas Drizzle + Zod
+├── 🗄️ database/                      # Configuración de base de datos
+│   └── migrations/                   # Migraciones de esquema
+└── 📦 dist/                          # Build optimizado para producción
 ```
 
-### 🎮 **Comandos mágicos**
+### 🔄 **Flujo de Datos y Arquitectura**
+
+```mermaid
+graph TD
+    A[Cliente React] --> B[TanStack Query]
+    B --> C[API Express.js]
+    C --> D{Tipo de Request}
+    D -->|Chat| E[Google Gemini API]
+    D -->|Auth| F[Google OAuth]
+    D -->|Data| G[Database Storage]
+    E --> H[Respuesta de IA]
+    F --> I[Sesión de Usuario]
+    G --> J[Conversaciones]
+    H --> K[Frontend Update]
+    I --> K
+    J --> K
+```
+
+### 🔧 **APIs y Endpoints Técnicos**
+
+<table>
+<tr>
+<td width="50%">
+
+**Endpoints de IA**
+```typescript
+POST /api/conversations/{id}/messages
+// Respuestas de Google Gemini
+// Soporte multimodal (texto, imágenes)
+// Análisis de archivos adjuntos
+
+GET /api/conversations
+// Lista de conversaciones del usuario
+// Persistencia en base de datos
+
+GET /api/conversations/{id}
+// Obtener conversación específica
+// Historial de mensajes
+```
+
+</td>
+<td width="50%">
+
+**Autenticación y Datos**
+```typescript
+POST /api/auth/google 
+// OAuth2 con Google
+// Session-based con cookies
+
+GET /api/user
+// Datos del usuario autenticado
+// Información de sesión
+
+POST /api/files/upload
+// Upload de archivos multimodales
+// Análisis automático con Gemini
+```
+
+</td>
+</tr>
+</table>
+
+### 🚀 **Características Técnicas Implementadas**
+
+- **🤖 Google Gemini Integration:** API oficial con análisis multimodal
+- **🎯 Context Management:** Mantiene historial completo de conversaciones  
+- **🗄️ Data Persistence:** MongoDB y almacenamiento en memoria
+- **🔐 Google OAuth2:** Autenticación segura con Passport.js
+- **🎨 Theme System:** Tema oscuro/claro persistente con CSS variables
+- **♿ Accesibilidad:** Text-to-Speech integrado con Web Speech API
+- **📱 Progressive Web App:** Interfaz responsive e instalable
+- **📁 File Processing:** Análisis automático de archivos con IA
+- **⚡ Modern Stack:** React 18, TypeScript, TailwindCSS, TanStack Query
+
+### 🎮 **Comandos de Desarrollo**
 
 ```bash
-npm run dev      # 🚀 Servidor de desarrollo
-npm run build    # 📦 Build para producción  
-npm run start    # 🏃 Ejecutar en producción
-npm run check    # 🔍 Verificar TypeScript
+# 🚀 Desarrollo
+npm run dev         # Servidor con hot-reload (frontend + backend)
+npm run dev:client  # Solo frontend en desarrollo
+npm run dev:server  # Solo backend en desarrollo
+
+# 📦 Producción  
+npm run build       # Build optimizado para producción
+npm run start       # Ejecutar en modo producción
+npm run deploy      # Deploy a Vercel con env variables
+
+# 🔍 Quality Assurance
+npm run check       # Verificar TypeScript en todo el proyecto
+npm run lint        # ESLint + Prettier
+npm run test        # Tests unitarios y de integración
+npm run db:migrate  # Ejecutar migraciones de base de datos
 ```
 
 ---
@@ -387,6 +497,43 @@ npm run check    # 🔍 Verificar TypeScript
 
 ---
 
+## 📄 Licencias
+
+<div align="center">
+
+Este proyecto está disponible bajo dos licencias diferentes, puedes elegir la que mejor se adapte a tus necesidades:
+
+<table>
+<tr>
+<td align="center" width="50%">
+<h3>📜 Licencia MIT</h3>
+<a href="./LICENSE">
+<img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge"/>
+</a>
+<br><em>Permisiva y simple</em>
+<br>• Uso comercial permitido
+<br>• Modificación permitida
+<br>• Distribución permitida
+</td>
+<td align="center" width="50%">
+<h3>📜 Licencia Apache 2.0</h3>
+<a href="./LICENSE-APACHE">
+<img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=for-the-badge"/>
+</a>
+<br><em>Protección de patentes</em>
+<br>• Uso comercial permitido
+<br>• Modificación permitida  
+<br>• Protección de patentes
+</td>
+</tr>
+</table>
+
+**Copyright © 2025 aguita - Todos los derechos reservados**
+
+</div>
+
+---
+
 <div align="center">
 
 ## 💜 Hecho con mucho amor
@@ -394,7 +541,7 @@ npm run check    # 🔍 Verificar TypeScript
 ```
 ✨ Gracias a todos los servicios increíbles que hacen posible a Stelluna ✨
 
-🧠 Google Gemini  •  🚀 Mistral AI  •  🌐 OpenRouter  •  ☁️ Vercel  •  🗄️ MongoDB
+🧠 Google Gemini  •  ☁️ Vercel  •  🗄️ MongoDB  •  ⚛️ React  •  🔷 TypeScript
 ```
 
 <br>
@@ -404,7 +551,7 @@ npm run check    # 🔍 Verificar TypeScript
 <br>
 
 ```
-    💜 Creado con 💜 por el equipo de Stelluna AI 💜
+    💜 Creado con 💜 por aguita 💜
     
     🌙 ¡Que tengas conversaciones mágicas con Stelluna! ✨
 ```
